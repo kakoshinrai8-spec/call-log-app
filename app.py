@@ -4,8 +4,11 @@ from google.oauth2.service_account import Credentials
 from datetime import datetime
 import pandas as pd
 
-creds = Credentials.from_service_account_file(
-    "credentials.json",
+# ===== Secretsから認証 =====
+creds_dict = st.secrets["gcp_service_account"]
+
+creds = Credentials.from_service_account_info(
+    creds_dict,
     scopes=[
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive"
@@ -14,8 +17,8 @@ creds = Credentials.from_service_account_file(
 
 client = gspread.authorize(creds)
 
-# ===== ★ID使わない（ここがポイント）=====
-SPREADSHEET_NAME = "電話対応ログ"  # ←一覧に出てる名前そのまま
+# ===== シート =====
+SPREADSHEET_NAME = "電話対応ログ"
 SHEET_NAME = "logs"
 
 sheet = client.open(SPREADSHEET_NAME)
@@ -45,13 +48,4 @@ data = ws.get_all_records()
 df = pd.DataFrame(data)
 
 if not df.empty:
-    st.subheader("📋 ログ一覧")
     st.dataframe(df)
-
-    df["日付のみ"] = pd.to_datetime(df["日付"]).dt.date
-
-    st.subheader("📊 日別件数")
-    st.dataframe(df.groupby("日付のみ").size().reset_index(name="件数"))
-
-    st.subheader("👤 担当者別件数")
-    st.dataframe(df.groupby("担当者").size().reset_index(name="件数"))
