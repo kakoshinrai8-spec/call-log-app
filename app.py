@@ -1,10 +1,15 @@
 import streamlit as st
+import pandas as pd
+from datetime import date
 import gspread
 from google.oauth2.service_account import Credentials
-from datetime import datetime
-import pandas as pd
 
-# ===== Secretsから認証 =====
+st.set_page_config(page_title="電話対応ログ", layout="wide")
+st.title("電話対応ログ")
+
+today = date.today()
+
+# ===== 認証 =====
 creds_dict = st.secrets["gcp_service_account"]
 
 creds = Credentials.from_service_account_info(
@@ -16,65 +21,135 @@ creds = Credentials.from_service_account_info(
 )
 
 client = gspread.authorize(creds)
+ws = client.open("電話対応ログ").worksheet("logs")
 
-# ===== シート =====
-SPREADSHEET_NAME = "電話対応ログ"
-SHEET_NAME = "logs"
+# =========================
+# 担当者（最初だけ選択）
+# =========================
+if "staff" not in st.session_state:
+    st.session_state.staff = ""
 
-sheet = client.open(SPREADSHEET_NAME)
-ws = sheet.worksheet(SHEET_NAME)
+if st.session_state.staff == "":
+    staff = st.selectbox(
+        "あなたの名前を選択",
+        ["吉田", "伊藤", "高木", "加藤", "加古"]
+    )
 
-st.title("📞 電話ログアプリ")
+    if st.button("決定"):
+        st.session_state.staff = staff
+        st.rerun()
 
-# ===== 入力 =====
-col1, col2 = st.columns(2)
+    st.stop()
 
-with col1:
-    担当者 = st.selectbox("担当者", ["吉田", "伊藤", "高木", "加藤", "加古"])
+staff = st.session_state.staff
+st.write(f"担当者：{staff}")
 
-with col2:
-    エリア = st.text_input("エリア")
-
-相手 = st.text_input("相手")
-対応時間 = st.number_input("対応時間（分）", min_value=0)
-要件 = st.selectbox("要件", ["問い合わせ", "伝票確認", "在庫確認", "その他"])
-備考 = st.text_area("備考")
-
-# ===== 登録 =====
-if st.button("登録"):
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    ws.append_row([
-        now,
-        担当者,
-        エリア,
-        相手,
-        対応時間,
-        要件,
-        備考
-    ])
-
-    st.success("登録しました！")
-
-# ===== 表示 =====
+# =========================
+# データ読み込み
+# =========================
 data = ws.get_all_records()
 df = pd.DataFrame(data)
 
+if df.empty:
+    df = pd.DataFrame(columns=["日付","番号","担当者","エリア","相手","対応時間（分）","要件","備考"])
+
+df["対応時間（分）"] = pd.to_numeric(df["対応時間（分）"], errors="coerce").fillna(0)
+
+# =========================
+# 入力フォーム
+# =========================
+col1, col2 = st.columns(2)
+
+with col1:
+    area = st.selectbox("エリア", ["大分", "熊本"])
+
+    partner = st.selectbox(
+        "相手",
+        ["得意先", "岡崎", "小薮", "美濃", "鶴岡", "椎葉", "倉庫配送", "内線", "その他"]
+    )
+
+    minutes = st.number_input("対応時間（分）", min_value=1, step=1)
+
+with col2:
+    category = st.selectbox(
+        "要件",
+        [
+            "注文",
+            "商品問合せ",
+            "納期依頼",
+            "見積依頼",
+            "返品依頼",
+            "伝票確認",
+            "在庫確認",
+            "その他"
+        ]
+    )
+
+    note = st.text_input("備考")
+
+# =========================
+# 追加処理
+# =========================
+if st.button("追加"):
+    new_row = [
+        str(today),
+        len(df) + 1,
+        staff,
+        area,
+        partner,
+        minutes,
+        category,
+        note
+    ]
+
+    ws.append_row(new_row)
+    st.rerun()
+
+# =========================
+# 削除機能
+# =========================
 if not df.empty:
-    st.subheader("📋 ログ一覧")
-    st.dataframe(df)
+    st.subheader("入力履歴（削除できます）")
 
-    df["日付のみ"] = pd.to_datetime(df["日付"]).dt.date
+    for i, row in df.iterrows():
+        col1, col2 = st.columns([8,1])
 
-    st.subheader("📊 日別件数")
-    st.dataframe(df.groupby("日付のみ").size().reset_index(name="件数"))
+        with col1:
+            st.write(
+                f"{row['日付']} | {row['担当者']} | {row['エリア']} | {row['相手']} | {row['対応時間（分）']}分 | {row['要件']}"
+            )
 
-    st.subheader("👤 担当者別件数")
-    st.dataframe(df.groupby("担当者").size().reset_index(name="件数"))
+        with col2:
+            if st.button("削除", key=i):
+                ws.delete_rows(i + 2)
+                st.rerun()
 
-    st.subheader("🗑 削除")
-    delete_index = st.number_input("削除する行番号（0から）", min_value=0, step=1)
+    # =========================
+    # 集計
+    # =========================
+    total = int(df["対応時間（分）"].sum())
+    h = total // 60
+    m = total % 60
 
-    if st.button("削除実行"):
-        ws.delete_rows(delete_index + 2)
-        st.warning("削除しました。再読み込みしてください。")
+    st.subheader("全体合計")
+    st.write(f"{total}分（{h}時間{m}分）")
+
+    daily = df.groupby("日付")["対応時間（分）"].sum().reset_index()
+    st.subheader("日別")
+    st.dataframe(daily)
+
+    staff_summary = df.groupby("担当者")["対応時間（分）"].sum().reset_index()
+    st.subheader("担当者別")
+    st.dataframe(staff_summary)
+
+    # =========================
+    # Excel出力
+    # =========================
+    output = "電話対応ログ.xlsx"
+    with pd.ExcelWriter(output) as writer:
+        df.to_excel(writer, sheet_name="全データ", index=False)
+        daily.to_excel(writer, sheet_name="日別", index=False)
+        staff_summary.to_excel(writer, sheet_name="担当者別", index=False)
+
+    with open(output, "rb") as f:
+        st.download_button("Excelダウンロード", f, file_name="電話対応ログ.xlsx")
