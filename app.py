@@ -8,8 +8,10 @@ from streamlit_autorefresh import st_autorefresh
 st.set_page_config(page_title="電話対応ログ", layout="wide")
 st.title("電話対応ログ")
 
-# ===== 自動更新（5秒）=====
-st_autorefresh(interval=5000, key="refresh")
+# ===== 自動更新（15秒）=====
+auto = st.toggle("自動更新ON", value=True)
+if auto:
+    st_autorefresh(interval=15000, key="refresh")
 
 today = date.today()
 
@@ -25,7 +27,11 @@ creds = Credentials.from_service_account_info(
 )
 
 client = gspread.authorize(creds)
-ws = client.open("電話対応ログ").worksheet("logs")
+
+# ===== ★ここが今回の本命（ID指定）=====
+SPREADSHEET_ID = "1yjuuTEPG8rsIr8Wctl6vtFmsU0cJy0rmsbvDnvpm934"
+sheet = client.open_by_key(SPREADSHEET_ID)
+ws = sheet.worksheet("logs")
 
 # =========================
 # 担当者（最初だけ選択）
@@ -138,30 +144,10 @@ if not df.empty:
     st.subheader("全体合計")
     st.write(f"{total}分（{h}時間{m}分）")
 
-    # 日別
     daily = df.groupby("日付")["対応時間（分）"].sum().reset_index()
     st.subheader("日別")
     st.dataframe(daily)
 
-    # 担当者別
     staff_summary = df.groupby("担当者")["対応時間（分）"].sum().reset_index()
     st.subheader("担当者別")
     st.dataframe(staff_summary)
-
-    # =========================
-    # スプレッドに集計反映
-    # =========================
-    def get_or_create(name):
-        try:
-            return client.open("電話対応ログ").worksheet(name)
-        except:
-            return client.open("電話対応ログ").add_worksheet(title=name, rows=1000, cols=20)
-
-    daily_ws = get_or_create("日別")
-    staff_ws = get_or_create("担当者別")
-
-    daily_ws.clear()
-    staff_ws.clear()
-
-    daily_ws.update([daily.columns.values.tolist()] + daily.values.tolist())
-    staff_ws.update([staff_summary.columns.values.tolist()] + staff_summary.values.tolist())
