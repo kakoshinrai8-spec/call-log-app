@@ -3,9 +3,13 @@ import pandas as pd
 from datetime import date
 import gspread
 from google.oauth2.service_account import Credentials
+from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(page_title="電話対応ログ", layout="wide")
 st.title("電話対応ログ")
+
+# ===== 自動更新（5秒）=====
+st_autorefresh(interval=5000, key="refresh")
 
 today = date.today()
 
@@ -134,22 +138,30 @@ if not df.empty:
     st.subheader("全体合計")
     st.write(f"{total}分（{h}時間{m}分）")
 
+    # 日別
     daily = df.groupby("日付")["対応時間（分）"].sum().reset_index()
     st.subheader("日別")
     st.dataframe(daily)
 
+    # 担当者別
     staff_summary = df.groupby("担当者")["対応時間（分）"].sum().reset_index()
     st.subheader("担当者別")
     st.dataframe(staff_summary)
 
     # =========================
-    # Excel出力
+    # スプレッドに集計反映
     # =========================
-    output = "電話対応ログ.xlsx"
-    with pd.ExcelWriter(output) as writer:
-        df.to_excel(writer, sheet_name="全データ", index=False)
-        daily.to_excel(writer, sheet_name="日別", index=False)
-        staff_summary.to_excel(writer, sheet_name="担当者別", index=False)
+    def get_or_create(name):
+        try:
+            return client.open("電話対応ログ").worksheet(name)
+        except:
+            return client.open("電話対応ログ").add_worksheet(title=name, rows=1000, cols=20)
 
-    with open(output, "rb") as f:
-        st.download_button("Excelダウンロード", f, file_name="電話対応ログ.xlsx")
+    daily_ws = get_or_create("日別")
+    staff_ws = get_or_create("担当者別")
+
+    daily_ws.clear()
+    staff_ws.clear()
+
+    daily_ws.update([daily.columns.values.tolist()] + daily.values.tolist())
+    staff_ws.update([staff_summary.columns.values.tolist()] + staff_summary.values.tolist())
