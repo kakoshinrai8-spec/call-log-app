@@ -5,12 +5,17 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 st.set_page_config(page_title="電話対応ログ", layout="wide")
-st.title("電話対応ログ")
 
-# ===== 今日の日付 =====
+# =========================
+# タイトル
+# =========================
+st.title("📞 電話対応ログ")
+
+# =========================
+# 日付更新チェック
+# =========================
 today = str(date.today())
 
-# ===== 日付変化で自動更新（1日1回）=====
 if "last_date" not in st.session_state:
     st.session_state.last_date = today
 
@@ -18,23 +23,18 @@ if st.session_state.last_date != today:
     st.session_state.last_date = today
     st.rerun()
 
-# ===== 手動更新 =====
-if st.button("🔄 更新"):
-    st.rerun()
+# =========================
+# 更新ボタン（上に配置）
+# =========================
+colA, colB = st.columns([8,2])
 
-# ===== 入力モード =====
-mode = st.radio("入力モード", ["通常入力", "過去入力"], horizontal=True)
+with colB:
+    if st.button("🔄 更新"):
+        st.rerun()
 
-if mode == "通常入力":
-    selected_date = date.today()
-else:
-    selected_date = st.date_input("入力日付", value=date.today())
-
-# ===== 表示日付（ここが今回のポイント）=====
-view_date = st.date_input("表示する日付", value=date.today())
-view_date_str = str(view_date)
-
-# ===== 認証 =====
+# =========================
+# 認証
+# =========================
 creds_dict = st.secrets["gcp_service_account"]
 
 creds = Credentials.from_service_account_info(
@@ -52,7 +52,7 @@ sheet = client.open_by_key(SPREADSHEET_ID)
 ws = sheet.worksheet("logs")
 
 # =========================
-# 担当者（最初だけ）
+# 担当者選択
 # =========================
 if "staff" not in st.session_state:
     st.session_state.staff = ""
@@ -70,7 +70,7 @@ if st.session_state.staff == "":
     st.stop()
 
 staff = st.session_state.staff
-st.write(f"担当者：{staff}")
+st.success(f"担当者：{staff}")
 
 # =========================
 # データ取得
@@ -84,8 +84,17 @@ if df.empty:
 df["対応時間（分）"] = pd.to_numeric(df["対応時間（分）"], errors="coerce").fillna(0)
 
 # =========================
-# 入力フォーム
+# 入力エリア
 # =========================
+st.subheader("入力")
+
+mode = st.radio("入力モード", ["通常入力", "過去入力"], horizontal=True)
+
+if mode == "通常入力":
+    selected_date = date.today()
+else:
+    selected_date = st.date_input("入力日付", value=date.today())
+
 col1, col2 = st.columns(2)
 
 with col1:
@@ -115,13 +124,10 @@ with col2:
 
     note = st.text_input("備考")
 
-# =========================
-# 追加
-# =========================
 if st.button("追加"):
     number = df["番号"].max() + 1 if not df.empty else 1
 
-    new_row = [
+    ws.append_row([
         str(selected_date),
         number,
         staff,
@@ -130,25 +136,32 @@ if st.button("追加"):
         minutes,
         category,
         note
-    ]
+    ])
 
-    ws.append_row(new_row)
+    st.success("追加しました")
     st.rerun()
 
 # =========================
-# 表示データ（選択日）
+# 区切り
 # =========================
-df_view = df[df["日付"] == view_date_str]
+st.divider()
 
 # =========================
-# スクロール＋削除
+# 履歴エリア
 # =========================
+st.subheader("履歴")
+
+# 👉ここに移動（重要）
+view_date = st.date_input("表示する日付", value=date.today())
+view_date_str = str(view_date)
+
+df_view = df[df["日付"] == view_date_str]
+
 if not df_view.empty:
-    st.subheader(f"{view_date} の入力履歴（削除できます）")
 
     df_display = df_view.sort_index(ascending=False).reset_index()
 
-    with st.container(height=200):
+    with st.container(height=220):
         for i, row in df_display.iterrows():
             col1, col2 = st.columns([8,1])
 
@@ -162,9 +175,7 @@ if not df_view.empty:
                     ws.delete_rows(int(row["index"]) + 2)
                     st.rerun()
 
-    # =========================
-    # 集計（選択日）
-    # =========================
+    # ===== 集計 =====
     total = int(df_view["対応時間（分）"].sum())
     h = total // 60
     m = total % 60
@@ -173,7 +184,6 @@ if not df_view.empty:
     st.write(f"{total}分（{h}時間{m}分）")
 
     staff_summary = df_view.groupby("担当者")["対応時間（分）"].sum().reset_index()
-    st.subheader("担当者別")
     st.dataframe(staff_summary)
 
 else:
