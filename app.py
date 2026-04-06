@@ -10,7 +10,7 @@ st.title("電話対応ログ")
 # ===== 今日の日付 =====
 today = str(date.today())
 
-# ===== 日付変化検知（1日1回自動更新）=====
+# ===== 日付変化で自動更新（1日1回）=====
 if "last_date" not in st.session_state:
     st.session_state.last_date = today
 
@@ -28,7 +28,11 @@ mode = st.radio("入力モード", ["通常入力", "過去入力"], horizontal=
 if mode == "通常入力":
     selected_date = date.today()
 else:
-    selected_date = st.date_input("日付選択", value=date.today())
+    selected_date = st.date_input("入力日付", value=date.today())
+
+# ===== 表示日付（ここが今回のポイント）=====
+view_date = st.date_input("表示する日付", value=date.today())
+view_date_str = str(view_date)
 
 # ===== 認証 =====
 creds_dict = st.secrets["gcp_service_account"]
@@ -132,17 +136,17 @@ if st.button("追加"):
     st.rerun()
 
 # =========================
-# 当日データ
+# 表示データ（選択日）
 # =========================
-df_today = df[df["日付"] == today]
+df_view = df[df["日付"] == view_date_str]
 
 # =========================
 # スクロール＋削除
 # =========================
-if not df_today.empty:
-    st.subheader("本日の入力履歴（削除できます）")
+if not df_view.empty:
+    st.subheader(f"{view_date} の入力履歴（削除できます）")
 
-    df_display = df_today.sort_index(ascending=False).reset_index()
+    df_display = df_view.sort_index(ascending=False).reset_index()
 
     with st.container(height=200):
         for i, row in df_display.iterrows():
@@ -158,17 +162,19 @@ if not df_today.empty:
                     ws.delete_rows(int(row["index"]) + 2)
                     st.rerun()
 
-    # ===== 集計 =====
-    total = int(df_today["対応時間（分）"].sum())
+    # =========================
+    # 集計（選択日）
+    # =========================
+    total = int(df_view["対応時間（分）"].sum())
     h = total // 60
     m = total % 60
 
-    st.subheader("本日合計")
+    st.subheader("合計")
     st.write(f"{total}分（{h}時間{m}分）")
 
-    staff_summary = df_today.groupby("担当者")["対応時間（分）"].sum().reset_index()
-    st.subheader("担当者別（本日）")
+    staff_summary = df_view.groupby("担当者")["対応時間（分）"].sum().reset_index()
+    st.subheader("担当者別")
     st.dataframe(staff_summary)
 
 else:
-    st.info("本日のデータはまだありません")
+    st.info("この日のデータはありません")
