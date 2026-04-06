@@ -3,15 +3,24 @@ import pandas as pd
 from datetime import date
 import gspread
 from google.oauth2.service_account import Credentials
-from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(page_title="電話対応ログ", layout="wide")
 st.title("電話対応ログ")
 
-# ===== 自動更新 ON/OFF =====
-auto = st.toggle("自動更新ON", value=True)
-if auto:
-    st_autorefresh(interval=15000, key="refresh")
+# ===== 今日の日付 =====
+today = str(date.today())
+
+# ===== 日付変化検知（1日1回自動更新）=====
+if "last_date" not in st.session_state:
+    st.session_state.last_date = today
+
+if st.session_state.last_date != today:
+    st.session_state.last_date = today
+    st.rerun()
+
+# ===== 手動更新 =====
+if st.button("🔄 更新"):
+    st.rerun()
 
 # ===== 入力モード =====
 mode = st.radio("入力モード", ["通常入力", "過去入力"], horizontal=True)
@@ -123,15 +132,18 @@ if st.button("追加"):
     st.rerun()
 
 # =========================
-# スクロール＋1行削除
+# 当日データ
 # =========================
-if not df.empty:
-    st.subheader("入力履歴（削除できます）")
+df_today = df[df["日付"] == today]
 
-    # 新しい順
-    df_display = df.sort_index(ascending=False).reset_index()
+# =========================
+# スクロール＋削除
+# =========================
+if not df_today.empty:
+    st.subheader("本日の入力履歴（削除できます）")
 
-    # 高さ固定スクロール
+    df_display = df_today.sort_index(ascending=False).reset_index()
+
     with st.container(height=200):
         for i, row in df_display.iterrows():
             col1, col2 = st.columns([8,1])
@@ -146,20 +158,17 @@ if not df.empty:
                     ws.delete_rows(int(row["index"]) + 2)
                     st.rerun()
 
-    # =========================
-    # 集計
-    # =========================
-    total = int(df["対応時間（分）"].sum())
+    # ===== 集計 =====
+    total = int(df_today["対応時間（分）"].sum())
     h = total // 60
     m = total % 60
 
-    st.subheader("全体合計")
+    st.subheader("本日合計")
     st.write(f"{total}分（{h}時間{m}分）")
 
-    daily = df.groupby("日付")["対応時間（分）"].sum().reset_index()
-    st.subheader("日別")
-    st.dataframe(daily)
-
-    staff_summary = df.groupby("担当者")["対応時間（分）"].sum().reset_index()
-    st.subheader("担当者別")
+    staff_summary = df_today.groupby("担当者")["対応時間（分）"].sum().reset_index()
+    st.subheader("担当者別（本日）")
     st.dataframe(staff_summary)
+
+else:
+    st.info("本日のデータはまだありません")
