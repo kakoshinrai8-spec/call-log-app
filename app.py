@@ -39,7 +39,7 @@ sheet = client.open_by_key(SPREADSHEET_ID)
 ws = sheet.worksheet("logs")
 
 # =========================
-# 担当者（最初だけ選択）
+# 担当者（最初だけ）
 # =========================
 if "staff" not in st.session_state:
     st.session_state.staff = ""
@@ -123,23 +123,28 @@ if st.button("追加"):
     st.rerun()
 
 # =========================
-# 削除
+# スクロール＋1行削除
 # =========================
 if not df.empty:
     st.subheader("入力履歴（削除できます）")
 
-    for i, row in df.iterrows():
-        col1, col2 = st.columns([8,1])
+    # 新しい順
+    df_display = df.sort_index(ascending=False).reset_index()
 
-        with col1:
-            st.write(
-                f"{row['日付']} | {row['担当者']} | {row['エリア']} | {row['相手']} | {row['対応時間（分）']}分 | {row['要件']}"
-            )
+    # 高さ固定スクロール
+    with st.container(height=200):
+        for i, row in df_display.iterrows():
+            col1, col2 = st.columns([8,1])
 
-        with col2:
-            if st.button("削除", key=i):
-                ws.delete_rows(i + 2)
-                st.rerun()
+            with col1:
+                st.write(
+                    f"{row['日付']} | {row['担当者']} | {row['エリア']} | {row['相手']} | {row['対応時間（分）']}分 | {row['要件']}"
+                )
+
+            with col2:
+                if st.button("削除", key=f"del_{i}"):
+                    ws.delete_rows(int(row["index"]) + 2)
+                    st.rerun()
 
     # =========================
     # 集計
