@@ -8,12 +8,18 @@ from streamlit_autorefresh import st_autorefresh
 st.set_page_config(page_title="電話対応ログ", layout="wide")
 st.title("電話対応ログ")
 
-# ===== 自動更新（15秒）=====
+# ===== 自動更新 ON/OFF =====
 auto = st.toggle("自動更新ON", value=True)
 if auto:
     st_autorefresh(interval=15000, key="refresh")
 
-today = date.today()
+# ===== 入力モード =====
+mode = st.radio("入力モード", ["通常入力", "過去入力"], horizontal=True)
+
+if mode == "通常入力":
+    selected_date = date.today()
+else:
+    selected_date = st.date_input("日付選択", value=date.today())
 
 # ===== 認証 =====
 creds_dict = st.secrets["gcp_service_account"]
@@ -28,7 +34,6 @@ creds = Credentials.from_service_account_info(
 
 client = gspread.authorize(creds)
 
-# ===== ★ここが今回の本命（ID指定）=====
 SPREADSHEET_ID = "1yjuuTEPG8rsIr8Wctl6vtFmsU0cJy0rmsbvDnvpm934"
 sheet = client.open_by_key(SPREADSHEET_ID)
 ws = sheet.worksheet("logs")
@@ -55,7 +60,7 @@ staff = st.session_state.staff
 st.write(f"担当者：{staff}")
 
 # =========================
-# データ読み込み
+# データ取得
 # =========================
 data = ws.get_all_records()
 df = pd.DataFrame(data)
@@ -98,12 +103,14 @@ with col2:
     note = st.text_input("備考")
 
 # =========================
-# 追加処理
+# 追加
 # =========================
 if st.button("追加"):
+    number = df["番号"].max() + 1 if not df.empty else 1
+
     new_row = [
-        str(today),
-        len(df) + 1,
+        str(selected_date),
+        number,
         staff,
         area,
         partner,
@@ -116,7 +123,7 @@ if st.button("追加"):
     st.rerun()
 
 # =========================
-# 削除機能
+# 削除
 # =========================
 if not df.empty:
     st.subheader("入力履歴（削除できます）")
