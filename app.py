@@ -102,7 +102,7 @@ with col1:
 
     partner = st.selectbox(
         "相手",
-        ["得意先", "岡崎", "小薮", "美濃", "鶴岡", "椎葉", "倉庫配送", "内線", "その他"]
+        ["得意先", "岡崎", "小薮", "美濃", "鶴岡", "椎葉", "細水", "中野", "倉庫配送", "内線", "その他"]  # ←追加
     )
 
     minutes = st.number_input("対応時間（分）", min_value=1, step=1)
@@ -125,20 +125,20 @@ with col2:
     note = st.text_input("備考")
 
 # =========================
-# 追加処理（修正済み）
+# 追加処理
 # =========================
 if st.button("追加"):
     number = int(df["番号"].max()) + 1 if not df.empty else 1
 
     ws.append_row([
-        selected_date.strftime("%Y-%m-%d"),  # 日付OK
-        int(number),                        # 念のため
+        selected_date.strftime("%Y-%m-%d"),
+        int(number),
         str(staff),
         str(area),
         str(partner),
-        int(minutes),                      # ←ここ重要
+        int(minutes),
         str(category),
-        note if note else ""              # ←None対策
+        note if note else ""
     ])
 
     st.success("追加しました")
