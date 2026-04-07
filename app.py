@@ -124,18 +124,21 @@ with col2:
 
     note = st.text_input("備考")
 
+# =========================
+# 追加処理（修正済み）
+# =========================
 if st.button("追加"):
-    number = df["番号"].max() + 1 if not df.empty else 1
+    number = int(df["番号"].max()) + 1 if not df.empty else 1
 
     ws.append_row([
-        str(selected_date),
-        number,
-        staff,
-        area,
-        partner,
-        minutes,
-        category,
-        note
+        selected_date.strftime("%Y-%m-%d"),  # 日付OK
+        int(number),                        # 念のため
+        str(staff),
+        str(area),
+        str(partner),
+        int(minutes),                      # ←ここ重要
+        str(category),
+        note if note else ""              # ←None対策
     ])
 
     st.success("追加しました")
@@ -151,7 +154,6 @@ st.divider()
 # =========================
 st.subheader("履歴")
 
-# 👉ここに移動（重要）
 view_date = st.date_input("表示する日付", value=date.today())
 view_date_str = str(view_date)
 
