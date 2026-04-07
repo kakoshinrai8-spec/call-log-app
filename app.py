@@ -24,7 +24,7 @@ if st.session_state.last_date != today:
     st.rerun()
 
 # =========================
-# 更新ボタン（上に配置）
+# 更新ボタン
 # =========================
 colA, colB = st.columns([8,2])
 
@@ -125,7 +125,12 @@ with col2:
     note = st.text_input("備考")
 
 # =========================
-# 追加処理（成功メッセージ対応）
+# 🔥 メッセージ表示エリア（ボタン直下）
+# =========================
+message_area = st.empty()
+
+# =========================
+# 追加処理
 # =========================
 if st.button("追加"):
     number = int(df["番号"].max()) + 1 if not df["番号"].isnull().all() else 1
@@ -144,9 +149,11 @@ if st.button("追加"):
     st.session_state["added"] = True
     st.rerun()
 
-# 👉 再描画後に表示
+# =========================
+# 🔥 追加メッセージ表示
+# =========================
 if st.session_state.get("added"):
-    st.success("追加しました")
+    message_area.success("✅ 追加しました")
     st.session_state["added"] = False
 
 # =========================
