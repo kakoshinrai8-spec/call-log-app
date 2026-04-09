@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import date, datetime
+from zoneinfo import ZoneInfo
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -42,7 +43,6 @@ def load_data():
     if df.empty:
         df = pd.DataFrame(columns=["日付", "番号", "担当者", "エリア", "相手", "対応時間（分）", "要件", "備考", "登録日時"])
 
-    # 既存シートに列がない場合の保険
     for col in ["日付", "番号", "担当者", "エリア", "相手", "対応時間（分）", "要件", "備考", "登録日時"]:
         if col not in df.columns:
             df[col] = ""
@@ -147,7 +147,7 @@ if st.button("追加"):
     max_number = pd.to_numeric(df["番号"], errors="coerce").max()
     number = int(max_number) + 1 if pd.notna(max_number) else 1
 
-    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    created_at = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S")
 
     ws.append_row([
         selected_date.strftime("%Y-%m-%d"),
@@ -197,7 +197,7 @@ if not df_view.empty:
             with col1:
                 registered_at = row["登録日時"] if pd.notna(row["登録日時"]) else ""
                 st.write(
-                    f"{row['日付']} | {registered_at} | {row['担当者']} | {row['エリア']} | {row['相手']} | {int(row['対応時間（分）'])}分 | {row['要件']}"
+                    f"{row['日付']} | {row['担当者']} | {row['エリア']} | {row['相手']} | {int(row['対応時間（分）'])}分 | {row['要件']} | {registered_at}"
                 )
 
             with col2:
