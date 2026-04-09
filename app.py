@@ -40,35 +40,12 @@ def load_data():
     df = pd.DataFrame(data)
 
     if df.empty:
-        df = pd.DataFrame(columns=["日付", "登録日時", "番号", "担当者", "エリア", "相手", "対応時間（分）", "要件", "備考"])
+        df = pd.DataFrame(columns=["日付", "番号", "担当者", "エリア", "相手", "対応時間（分）", "要件", "備考", "登録日時"])
 
     # 既存シートに列がない場合の保険
-    if "登録日時" not in df.columns:
-        df["登録日時"] = ""
-
-    if "番号" not in df.columns:
-        df["番号"] = ""
-
-    if "備考" not in df.columns:
-        df["備考"] = ""
-
-    if "日付" not in df.columns:
-        df["日付"] = ""
-
-    if "担当者" not in df.columns:
-        df["担当者"] = ""
-
-    if "エリア" not in df.columns:
-        df["エリア"] = ""
-
-    if "相手" not in df.columns:
-        df["相手"] = ""
-
-    if "要件" not in df.columns:
-        df["要件"] = ""
-
-    if "対応時間（分）" not in df.columns:
-        df["対応時間（分）"] = 0
+    for col in ["日付", "番号", "担当者", "エリア", "相手", "対応時間（分）", "要件", "備考", "登録日時"]:
+        if col not in df.columns:
+            df[col] = ""
 
     df["対応時間（分）"] = pd.to_numeric(df["対応時間（分）"], errors="coerce").fillna(0)
     df["番号"] = pd.to_numeric(df["番号"], errors="coerce")
@@ -174,14 +151,14 @@ if st.button("追加"):
 
     ws.append_row([
         selected_date.strftime("%Y-%m-%d"),
-        created_at,
         int(number),
         str(staff),
         str(area),
         str(partner),
         int(minutes),
         str(category),
-        note if note else ""
+        note if note else "",
+        created_at
     ])
 
     load_data.clear()
@@ -229,7 +206,6 @@ if not df_view.empty:
                     load_data.clear()
                     st.rerun()
 
-    # ===== 集計 =====
     total = int(df_view["対応時間（分）"].sum())
     h = total // 60
     m = total % 60
