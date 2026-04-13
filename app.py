@@ -115,7 +115,8 @@ with col1:
         ["得意先", "岡崎", "小薮", "美濃", "鶴岡", "椎葉", "細水", "中野", "倉庫配送", "内線", "その他"]
     )
 
-    minutes = st.number_input("対応時間（分）", min_value=1, step=1)
+    minutes = st.number_input("対応時間（分）", min_value=1, step=1, value=1)
+    count = st.number_input("件数", min_value=1, step=1, value=1)
 
 with col2:
     category = st.selectbox(
@@ -145,32 +146,39 @@ message_area = st.empty()
 # =========================
 if st.button("追加"):
     max_number = pd.to_numeric(df["番号"], errors="coerce").max()
-    number = int(max_number) + 1 if pd.notna(max_number) else 1
+    start_number = int(max_number) + 1 if pd.notna(max_number) else 1
 
     created_at = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S")
 
-    ws.append_row([
-        selected_date.strftime("%Y-%m-%d"),
-        int(number),
-        str(staff),
-        str(area),
-        str(partner),
-        int(minutes),
-        str(category),
-        note if note else "",
-        created_at
-    ])
+    rows_to_add = []
+    for i in range(int(count)):
+        rows_to_add.append([
+            selected_date.strftime("%Y-%m-%d"),
+            start_number + i,
+            str(staff),
+            str(area),
+            str(partner),
+            int(minutes),
+            str(category),
+            note if note else "",
+            created_at
+        ])
+
+    ws.append_rows(rows_to_add, value_input_option="USER_ENTERED")
 
     load_data.clear()
     st.session_state["added"] = True
+    st.session_state["added_count"] = int(count)
     st.rerun()
 
 # =========================
 # 追加メッセージ表示
 # =========================
 if st.session_state.get("added"):
-    message_area.success("✅ 追加しました")
+    added_count = st.session_state.get("added_count", 1)
+    message_area.success(f"✅ {added_count}件追加しました")
     st.session_state["added"] = False
+    st.session_state["added_count"] = 1
 
 # =========================
 # 区切り
@@ -212,9 +220,6 @@ if not df_view.empty:
 
     st.subheader("合計")
     st.write(f"{total}分（{h}時間{m}分）")
-
-    staff_summary = df_view.groupby("担当者")["対応時間（分）"].sum().reset_index()
-    st.dataframe(staff_summary, use_container_width=True)
 
 else:
     st.info("この日のデータはありません")
