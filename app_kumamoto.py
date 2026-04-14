@@ -20,21 +20,38 @@ WORKSHEET_NAME = "logs_熊本"
 
 STAFF_OPTIONS = ["實取", "濵田", "岩木", "木下", "松本"]
 
-PARTNER_OPTIONS = [
-    "得意先",
-    "佐々木",
-    "松岡",
-    "吉澤",
-    "秋山",
-    "斎藤",
-    "桑原",
-    "古賀",
-    "一村",
-    "遠藤",
-    "倉庫配送",
-    "内線",
-    "その他"
-]
+AREA_OPTIONS = ["大分", "熊本"]
+
+PARTNER_OPTIONS_BY_AREA = {
+    "大分": [
+        "得意先",
+        "岡崎",
+        "小薮",
+        "美濃",
+        "鶴岡",
+        "椎葉",
+        "細水",
+        "中野",
+        "倉庫配送",
+        "内線",
+        "その他"
+    ],
+    "熊本": [
+        "得意先",
+        "佐々木",
+        "松岡",
+        "吉澤",
+        "秋山",
+        "斎藤",
+        "桑原",
+        "古賀",
+        "一村",
+        "遠藤",
+        "倉庫配送",
+        "内線",
+        "その他"
+    ]
+}
 
 CATEGORY_OPTIONS = [
     "注文",
@@ -119,10 +136,7 @@ if "staff" not in st.session_state:
     st.session_state.staff = ""
 
 if st.session_state.staff == "":
-    staff = st.selectbox(
-        "あなたの名前を選択",
-        STAFF_OPTIONS
-    )
+    staff = st.selectbox("あなたの名前を選択", STAFF_OPTIONS)
 
     if st.button("決定"):
         st.session_state.staff = staff
@@ -153,23 +167,18 @@ else:
 col1, col2 = st.columns(2)
 
 with col1:
-    area = "熊本"
-    st.text_input("エリア", value=area, disabled=True)
+    area = st.selectbox("エリア", AREA_OPTIONS)
 
     partner = st.selectbox(
         "相手",
-        PARTNER_OPTIONS
+        PARTNER_OPTIONS_BY_AREA[area]
     )
 
     minutes = st.number_input("対応時間（分）", min_value=1, step=1, value=1)
     count = st.number_input("件数", min_value=1, step=1, value=1)
 
 with col2:
-    category = st.selectbox(
-        "要件",
-        CATEGORY_OPTIONS
-    )
-
+    category = st.selectbox("要件", CATEGORY_OPTIONS)
     note = st.text_input("備考")
 
 # =========================
