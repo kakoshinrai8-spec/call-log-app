@@ -20,7 +20,7 @@ WORKSHEET_NAME = "logs_熊本"
 
 STAFF_OPTIONS = ["實取", "濵田", "岩木", "木下", "松本"]
 
-AREA_OPTIONS = ["大分", "熊本"]
+AREA_OPTIONS = ["熊本", "大分"]
 
 PARTNER_OPTIONS_BY_AREA = {
     "大分": [
