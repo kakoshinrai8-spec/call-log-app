@@ -15,7 +15,7 @@ st.title("📞 電話対応ログ（熊本）")
 # =========================
 # 熊本版設定
 # =========================
-WORKSHEET_NAME = "logs_kumamoto"
+WORKSHEET_NAME = "logs_熊本"
 
 STAFF_OPTIONS = ["實取", "濵田", "岩木", "木下", "松本"]
 
