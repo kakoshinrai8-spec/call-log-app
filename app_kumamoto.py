@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 import gspread
+from gspread.exceptions import WorksheetNotFound
 from google.oauth2.service_account import Credentials
 
 st.set_page_config(page_title="電話対応ログ（熊本）", layout="wide")
@@ -47,6 +48,8 @@ CATEGORY_OPTIONS = [
     "その他"
 ]
 
+HEADER_COLUMNS = ["日付", "番号", "担当者", "エリア", "相手", "対応時間（分）", "要件", "備考", "登録日時"]
+
 # =========================
 # 接続キャッシュ
 # =========================
@@ -64,7 +67,14 @@ def get_worksheet():
 
     client = gspread.authorize(creds)
     sheet = client.open_by_key("1yjuuTEPG8rsIr8Wctl6vtFmsU0cJy0rmsbvDnvpm934")
-    return sheet.worksheet(WORKSHEET_NAME)
+
+    try:
+        ws = sheet.worksheet(WORKSHEET_NAME)
+    except WorksheetNotFound:
+        ws = sheet.add_worksheet(title=WORKSHEET_NAME, rows=1000, cols=20)
+        ws.append_row(HEADER_COLUMNS, value_input_option="USER_ENTERED")
+
+    return ws
 
 # =========================
 # データ取得キャッシュ
@@ -76,9 +86,9 @@ def load_data():
     df = pd.DataFrame(data)
 
     if df.empty:
-        df = pd.DataFrame(columns=["日付", "番号", "担当者", "エリア", "相手", "対応時間（分）", "要件", "備考", "登録日時"])
+        df = pd.DataFrame(columns=HEADER_COLUMNS)
 
-    for col in ["日付", "番号", "担当者", "エリア", "相手", "対応時間（分）", "要件", "備考", "登録日時"]:
+    for col in HEADER_COLUMNS:
         if col not in df.columns:
             df[col] = ""
 
