@@ -3,14 +3,69 @@ import pandas as pd
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 import gspread
+from gspread.exceptions import WorksheetNotFound
 from google.oauth2.service_account import Credentials
 
-st.set_page_config(page_title="電話対応ログ", layout="wide")
+st.set_page_config(page_title="電話対応ログ（大分）", layout="wide")
 
 # =========================
 # タイトル
 # =========================
-st.title("📞 電話対応ログ")
+st.title("📞 電話対応ログ（大分）")
+
+# =========================
+# 大分版設定
+# =========================
+WORKSHEET_NAME = "logs"
+
+STAFF_OPTIONS = ["吉田", "伊藤", "高木", "加藤", "加古"]
+
+AREA_OPTIONS = ["大分", "熊本"]
+
+PARTNER_OPTIONS_BY_AREA = {
+    "大分": [
+        "得意先",
+        "岡崎",
+        "小薮",
+        "美濃",
+        "鶴岡",
+        "椎葉",
+        "細水",
+        "中野",
+        "倉庫配送",
+        "内線",
+        "その他"
+    ],
+    "熊本": [
+        "得意先",
+        "佐々木",
+        "松岡",
+        "吉澤",
+        "秋山",
+        "斎藤",
+        "桑原",
+        "古賀",
+        "一村",
+        "遠藤",
+        "倉庫配送",
+        "内線",
+        "その他"
+    ]
+}
+
+CATEGORY_OPTIONS = [
+    "注文",
+    "商品問合せ",
+    "納期依頼",
+    "見積依頼",
+    "返品依頼",
+    "伝票確認",
+    "在庫確認",
+    "請求書関連",
+    "その他"
+]
+
+HEADER_COLUMNS = ["日付", "番号", "担当者", "エリア", "相手", "対応時間（分）", "要件", "備考", "登録日時"]
 
 # =========================
 # 接続キャッシュ
@@ -29,7 +84,14 @@ def get_worksheet():
 
     client = gspread.authorize(creds)
     sheet = client.open_by_key("1yjuuTEPG8rsIr8Wctl6vtFmsU0cJy0rmsbvDnvpm934")
-    return sheet.worksheet("logs")
+
+    try:
+        ws = sheet.worksheet(WORKSHEET_NAME)
+    except WorksheetNotFound:
+        ws = sheet.add_worksheet(title=WORKSHEET_NAME, rows=1000, cols=20)
+        ws.append_row(HEADER_COLUMNS, value_input_option="USER_ENTERED")
+
+    return ws
 
 # =========================
 # データ取得キャッシュ
@@ -41,9 +103,9 @@ def load_data():
     df = pd.DataFrame(data)
 
     if df.empty:
-        df = pd.DataFrame(columns=["日付", "番号", "担当者", "エリア", "相手", "対応時間（分）", "要件", "備考", "登録日時"])
+        df = pd.DataFrame(columns=HEADER_COLUMNS)
 
-    for col in ["日付", "番号", "担当者", "エリア", "相手", "対応時間（分）", "要件", "備考", "登録日時"]:
+    for col in HEADER_COLUMNS:
         if col not in df.columns:
             df[col] = ""
 
@@ -74,10 +136,7 @@ if "staff" not in st.session_state:
     st.session_state.staff = ""
 
 if st.session_state.staff == "":
-    staff = st.selectbox(
-        "あなたの名前を選択",
-        ["吉田", "伊藤", "高木", "加藤", "加古"]
-    )
+    staff = st.selectbox("あなたの名前を選択", STAFF_OPTIONS)
 
     if st.button("決定"):
         st.session_state.staff = staff
@@ -108,32 +167,18 @@ else:
 col1, col2 = st.columns(2)
 
 with col1:
-    area = st.selectbox("エリア", ["大分", "熊本"])
+    area = st.selectbox("エリア", AREA_OPTIONS)
 
     partner = st.selectbox(
         "相手",
-        ["得意先", "岡崎", "小薮", "美濃", "鶴岡", "椎葉", "細水", "中野", "倉庫配送", "内線", "その他"]
+        PARTNER_OPTIONS_BY_AREA[area]
     )
 
     minutes = st.number_input("対応時間（分）", min_value=1, step=1, value=1)
     count = st.number_input("件数", min_value=1, step=1, value=1)
 
 with col2:
-    category = st.selectbox(
-        "要件",
-        [
-            "注文",
-            "商品問合せ",
-            "納期依頼",
-            "見積依頼",
-            "返品依頼",
-            "伝票確認",
-            "在庫確認",
-            "請求書関連",
-            "その他"
-        ]
-    )
-
+    category = st.selectbox("要件", CATEGORY_OPTIONS)
     note = st.text_input("備考")
 
 # =========================
