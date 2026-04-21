@@ -172,6 +172,16 @@ st.success(f"担当者：{staff}")
 df = load_data()
 
 # =========================
+# リセットフラグ
+# =========================
+if "reset_form" not in st.session_state:
+    st.session_state["reset_form"] = False
+
+if st.session_state["reset_form"]:
+    reset_input_fields()
+    st.session_state["reset_form"] = False
+
+# =========================
 # 入力初期値
 # =========================
 if "input_mode" not in st.session_state:
@@ -254,9 +264,7 @@ if st.button("追加"):
     load_data.clear()
     st.session_state["added"] = True
     st.session_state["added_count"] = int(count)
-
-    reset_input_fields()
-
+    st.session_state["reset_form"] = True
     st.rerun()
 
 # =========================
