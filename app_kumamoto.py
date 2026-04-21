@@ -123,6 +123,16 @@ def load_data():
 
     return df
 
+def reset_input_fields():
+    st.session_state["input_mode"] = "通常入力"
+    st.session_state["input_selected_date"] = date.today()
+    st.session_state["input_area"] = AREA_OPTIONS[0]
+    st.session_state["input_partner"] = PARTNER_OPTIONS_BY_AREA[AREA_OPTIONS[0]][0]
+    st.session_state["input_minutes"] = 1
+    st.session_state["input_count"] = 1
+    st.session_state["input_category"] = CATEGORY_OPTIONS[0]
+    st.session_state["input_note"] = ""
+
 ws = get_worksheet()
 
 # =========================
@@ -162,33 +172,54 @@ st.success(f"担当者：{staff}")
 df = load_data()
 
 # =========================
+# 入力初期値
+# =========================
+if "input_mode" not in st.session_state:
+    st.session_state["input_mode"] = "通常入力"
+if "input_selected_date" not in st.session_state:
+    st.session_state["input_selected_date"] = date.today()
+if "input_area" not in st.session_state:
+    st.session_state["input_area"] = AREA_OPTIONS[0]
+if "input_partner" not in st.session_state:
+    st.session_state["input_partner"] = PARTNER_OPTIONS_BY_AREA[AREA_OPTIONS[0]][0]
+if "input_minutes" not in st.session_state:
+    st.session_state["input_minutes"] = 1
+if "input_count" not in st.session_state:
+    st.session_state["input_count"] = 1
+if "input_category" not in st.session_state:
+    st.session_state["input_category"] = CATEGORY_OPTIONS[0]
+if "input_note" not in st.session_state:
+    st.session_state["input_note"] = ""
+
+# =========================
 # 入力エリア
 # =========================
 st.subheader("入力")
 
-mode = st.radio("入力モード", ["通常入力", "過去入力"], horizontal=True)
+mode = st.radio("入力モード", ["通常入力", "過去入力"], horizontal=True, key="input_mode")
 
 if mode == "通常入力":
     selected_date = date.today()
+    st.session_state["input_selected_date"] = selected_date
 else:
-    selected_date = st.date_input("入力日付", value=date.today())
+    selected_date = st.date_input("入力日付", value=st.session_state["input_selected_date"], key="input_selected_date")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    area = st.selectbox("エリア", AREA_OPTIONS)
+    area = st.selectbox("エリア", AREA_OPTIONS, key="input_area")
 
-    partner = st.selectbox(
-        "相手",
-        PARTNER_OPTIONS_BY_AREA[area]
-    )
+    current_partner_options = PARTNER_OPTIONS_BY_AREA[area]
+    if st.session_state["input_partner"] not in current_partner_options:
+        st.session_state["input_partner"] = current_partner_options[0]
 
-    minutes = st.number_input("対応時間（分）", min_value=1, step=1, value=1)
-    count = st.number_input("件数", min_value=1, step=1, value=1)
+    partner = st.selectbox("相手", current_partner_options, key="input_partner")
+    minutes = st.number_input("対応時間（分）", min_value=1, step=1, key="input_minutes")
+    count = st.number_input("件数", min_value=1, step=1, key="input_count")
 
 with col2:
-    category = st.selectbox("要件", CATEGORY_OPTIONS)
-    note = st.text_input("備考")
+    category = st.selectbox("要件", CATEGORY_OPTIONS, key="input_category")
+    note = st.text_input("備考", key="input_note")
 
 # =========================
 # メッセージ表示エリア
@@ -223,6 +254,9 @@ if st.button("追加"):
     load_data.clear()
     st.session_state["added"] = True
     st.session_state["added_count"] = int(count)
+
+    reset_input_fields()
+
     st.rerun()
 
 # =========================
