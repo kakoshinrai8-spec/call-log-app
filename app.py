@@ -1,12 +1,23 @@
 import streamlit as st
 import pandas as pd
-from datetime import date, datetime
+from datetime import datetime
 from zoneinfo import ZoneInfo
 import gspread
 from gspread.exceptions import WorksheetNotFound
 from google.oauth2.service_account import Credentials
 
 st.set_page_config(page_title="電話対応ログ（大分）", layout="wide")
+
+# =========================
+# 日本時間設定
+# =========================
+JST = ZoneInfo("Asia/Tokyo")
+
+def today_jst():
+    return datetime.now(JST).date()
+
+def now_jst_str():
+    return datetime.now(JST).strftime("%Y-%m-%d %H:%M:%S")
 
 # =========================
 # タイトル
@@ -117,7 +128,7 @@ def load_data():
 
 def reset_input_fields():
     st.session_state["input_mode"] = "通常入力"
-    st.session_state["input_selected_date"] = date.today()
+    st.session_state["input_selected_date"] = today_jst()
     st.session_state["input_area"] = AREA_OPTIONS[0]
     st.session_state["input_partner"] = PARTNER_OPTIONS_BY_AREA[AREA_OPTIONS[0]][0]
     st.session_state["input_minutes"] = 1
@@ -130,7 +141,7 @@ ws = get_worksheet()
 # =========================
 # 日付更新チェック
 # =========================
-today = str(date.today())
+today = str(today_jst())
 
 if "last_date" not in st.session_state:
     st.session_state.last_date = today
@@ -179,7 +190,7 @@ if st.session_state["reset_form"]:
 if "input_mode" not in st.session_state:
     st.session_state["input_mode"] = "通常入力"
 if "input_selected_date" not in st.session_state:
-    st.session_state["input_selected_date"] = date.today()
+    st.session_state["input_selected_date"] = today_jst()
 if "input_area" not in st.session_state:
     st.session_state["input_area"] = AREA_OPTIONS[0]
 if "input_partner" not in st.session_state:
@@ -201,7 +212,7 @@ st.subheader("入力")
 mode = st.radio("入力モード", ["通常入力", "過去入力"], horizontal=True, key="input_mode")
 
 if mode == "通常入力":
-    selected_date = date.today()
+    selected_date = today_jst()
     st.session_state["input_selected_date"] = selected_date
 else:
     selected_date = st.date_input("入力日付", value=st.session_state["input_selected_date"], key="input_selected_date")
@@ -235,7 +246,7 @@ if st.button("追加"):
     max_number = pd.to_numeric(df["番号"], errors="coerce").max()
     start_number = int(max_number) + 1 if pd.notna(max_number) else 1
 
-    created_at = datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%Y-%m-%d %H:%M:%S")
+    created_at = now_jst_str()
 
     rows_to_add = []
     for i in range(int(count)):
@@ -278,7 +289,7 @@ st.divider()
 # =========================
 st.subheader("履歴")
 
-view_date = st.date_input("表示する日付", value=date.today(), key="view_date")
+view_date = st.date_input("表示する日付", value=today_jst(), key="view_date")
 view_date_str = str(view_date)
 
 df_view = df[df["日付"] == view_date_str]
