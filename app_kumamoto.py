@@ -25,7 +25,7 @@ def now_jst_str():
 st.markdown("""
 <style>
 .stApp {
-    background: #f4f6fb;
+    background: #eef2f7;
 }
 
 .block-container {
@@ -35,12 +35,12 @@ st.markdown("""
 }
 
 .app-header {
-    background: linear-gradient(135deg, #111827 0%, #1f2937 48%, #334155 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 48%, #334155 100%);
     color: white;
     padding: 26px 30px;
     border-radius: 22px;
     margin-bottom: 22px;
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
 }
 
 .app-title {
@@ -51,36 +51,36 @@ st.markdown("""
 
 .app-subtitle {
     font-size: 14px;
-    opacity: 0.82;
+    opacity: 0.84;
     margin-top: 7px;
 }
 
 .staff-badge {
     display: inline-block;
-    background: #eef2ff;
-    color: #3730a3;
+    background: #e0e7ff;
+    color: #312e81;
     padding: 9px 16px;
     border-radius: 999px;
     font-weight: 800;
     margin-bottom: 14px;
-    border: 1px solid #c7d2fe;
+    border: 1px solid #a5b4fc;
 }
 
 .section-card {
     background: #ffffff;
     padding: 22px 24px;
     border-radius: 20px;
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
-    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.10);
+    border: 1px solid #dbe3ef;
     margin-bottom: 22px;
 }
 
 .section-title {
     font-size: 20px;
     font-weight: 850;
-    color: #111827;
+    color: #0f172a;
     margin-bottom: 14px;
-    border-left: 6px solid #334155;
+    border-left: 6px solid #2563eb;
     padding-left: 10px;
 }
 
@@ -91,65 +91,132 @@ st.markdown("""
     margin-bottom: 14px;
 }
 
+/* 入力欄・プルダウン・日付欄 */
+div[data-baseweb="select"] > div,
+div[data-baseweb="input"] > div,
+div[data-baseweb="textarea"] > div {
+    background-color: #f8fafc !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+}
+
+div[data-baseweb="select"] > div:hover,
+div[data-baseweb="input"] > div:hover,
+div[data-baseweb="textarea"] > div:hover {
+    border-color: #2563eb !important;
+}
+
+div[data-baseweb="select"] input,
+div[data-baseweb="input"] input,
+textarea {
+    color: #0f172a !important;
+    font-weight: 650 !important;
+}
+
+/* ラベル */
+div[data-testid="stSelectbox"] label,
+div[data-testid="stNumberInput"] label,
+div[data-testid="stTextInput"] label,
+div[data-testid="stDateInput"] label {
+    font-weight: 800;
+    color: #0f172a;
+}
+
+/* メインボタン：決定・追加する */
+.stButton > button[kind="primary"] {
+    border-radius: 14px;
+    font-weight: 900;
+    min-height: 44px;
+    border: none !important;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    color: white !important;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
+}
+
+.stButton > button[kind="primary"]:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+    color: white !important;
+    border: none !important;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.34);
+}
+
+.stButton > button[kind="primary"]:active {
+    transform: translateY(0px);
+}
+
+/* 削除ボタン */
+.stButton > button[kind="secondary"] {
+    border-radius: 12px;
+    font-weight: 800;
+    min-height: 40px;
+    border: none !important;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    color: white !important;
+    box-shadow: 0 6px 14px rgba(220, 38, 38, 0.25);
+}
+
+.stButton > button[kind="secondary"]:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%) !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* ラジオボタン */
+div[data-testid="stRadio"] > div {
+    gap: 12px;
+}
+
+div[data-testid="stRadio"] label {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    padding: 8px 12px;
+    border-radius: 999px;
+}
+
+/* 履歴カード */
 .log-row {
     background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-left: 6px solid #475569;
+    border: 1px solid #dbe3ef;
+    border-left: 6px solid #2563eb;
     border-radius: 16px;
     padding: 13px 15px;
     margin-bottom: 10px;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 
 .log-main {
     font-weight: 850;
-    color: #111827;
+    color: #0f172a;
     font-size: 15px;
 }
 
 .log-sub {
     font-size: 13px;
-    color: #64748b;
+    color: #475569;
     margin-top: 5px;
     line-height: 1.5;
 }
 
+/* 合計 */
 .total-box {
-    background: linear-gradient(135deg, #111827 0%, #1e293b 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     color: white;
     border-radius: 20px;
     padding: 20px 24px;
     margin-top: 16px;
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
 }
 
 .total-label {
     font-size: 13px;
-    opacity: 0.76;
+    opacity: 0.78;
 }
 
 .total-value {
     font-size: 28px;
     font-weight: 900;
     margin-top: 5px;
-}
-
-.stButton > button {
-    border-radius: 13px;
-    font-weight: 800;
-    min-height: 42px;
-}
-
-div[data-testid="stRadio"] > div {
-    gap: 12px;
-}
-
-div[data-testid="stSelectbox"] label,
-div[data-testid="stNumberInput"] label,
-div[data-testid="stTextInput"] label,
-div[data-testid="stDateInput"] label {
-    font-weight: 750;
-    color: #1f2937;
 }
 
 hr {
@@ -323,7 +390,7 @@ if st.session_state.staff == "":
     st.markdown('<div class="section-title">担当者選択</div>', unsafe_allow_html=True)
     staff = st.selectbox("あなたの名前を選択", STAFF_OPTIONS)
 
-    if st.button("決定", use_container_width=True):
+    if st.button("決定", type="primary", use_container_width=True):
         st.session_state.staff = staff
         st.rerun()
 
@@ -402,7 +469,7 @@ with col2:
 
 message_area = st.empty()
 
-if st.button("＋ 追加する", use_container_width=True):
+if st.button("＋ 追加する", type="primary", use_container_width=True):
     max_number = pd.to_numeric(df["番号"], errors="coerce").max()
     start_number = int(max_number) + 1 if pd.notna(max_number) else 1
 
