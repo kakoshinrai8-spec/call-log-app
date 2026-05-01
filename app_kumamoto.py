@@ -20,9 +20,154 @@ def now_jst_str():
     return datetime.now(JST).strftime("%Y-%m-%d %H:%M:%S")
 
 # =========================
+# デザイン設定
+# =========================
+st.markdown("""
+<style>
+.stApp {
+    background: #f4f6fb;
+}
+
+.block-container {
+    padding-top: 1.6rem;
+    padding-bottom: 2rem;
+    max-width: 1180px;
+}
+
+.app-header {
+    background: linear-gradient(135deg, #111827 0%, #1f2937 48%, #334155 100%);
+    color: white;
+    padding: 26px 30px;
+    border-radius: 22px;
+    margin-bottom: 22px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+}
+
+.app-title {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+}
+
+.app-subtitle {
+    font-size: 14px;
+    opacity: 0.82;
+    margin-top: 7px;
+}
+
+.staff-badge {
+    display: inline-block;
+    background: #eef2ff;
+    color: #3730a3;
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-weight: 800;
+    margin-bottom: 14px;
+    border: 1px solid #c7d2fe;
+}
+
+.section-card {
+    background: #ffffff;
+    padding: 22px 24px;
+    border-radius: 20px;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e5e7eb;
+    margin-bottom: 22px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 850;
+    color: #111827;
+    margin-bottom: 14px;
+    border-left: 6px solid #334155;
+    padding-left: 10px;
+}
+
+.help-text {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: -6px;
+    margin-bottom: 14px;
+}
+
+.log-row {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-left: 6px solid #475569;
+    border-radius: 16px;
+    padding: 13px 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.log-main {
+    font-weight: 850;
+    color: #111827;
+    font-size: 15px;
+}
+
+.log-sub {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 5px;
+    line-height: 1.5;
+}
+
+.total-box {
+    background: linear-gradient(135deg, #111827 0%, #1e293b 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 20px 24px;
+    margin-top: 16px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+}
+
+.total-label {
+    font-size: 13px;
+    opacity: 0.76;
+}
+
+.total-value {
+    font-size: 28px;
+    font-weight: 900;
+    margin-top: 5px;
+}
+
+.stButton > button {
+    border-radius: 13px;
+    font-weight: 800;
+    min-height: 42px;
+}
+
+div[data-testid="stRadio"] > div {
+    gap: 12px;
+}
+
+div[data-testid="stSelectbox"] label,
+div[data-testid="stNumberInput"] label,
+div[data-testid="stTextInput"] label,
+div[data-testid="stDateInput"] label {
+    font-weight: 750;
+    color: #1f2937;
+}
+
+hr {
+    margin-top: 1.2rem;
+    margin-bottom: 1.2rem;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# =========================
 # タイトル
 # =========================
-st.title("📞 電話対応ログ（熊本）")
+st.markdown("""
+<div class="app-header">
+    <div class="app-title">📞 電話対応ログ</div>
+    <div class="app-subtitle">熊本営業所 / 受電記録管理</div>
+</div>
+""", unsafe_allow_html=True)
 
 # =========================
 # 熊本版設定
@@ -174,16 +319,19 @@ if "staff" not in st.session_state:
     st.session_state.staff = ""
 
 if st.session_state.staff == "":
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">担当者選択</div>', unsafe_allow_html=True)
     staff = st.selectbox("あなたの名前を選択", STAFF_OPTIONS)
 
-    if st.button("決定"):
+    if st.button("決定", use_container_width=True):
         st.session_state.staff = staff
         st.rerun()
 
+    st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 staff = st.session_state.staff
-st.success(f"担当者：{staff}")
+st.markdown(f'<div class="staff-badge">担当者：{staff}</div>', unsafe_allow_html=True)
 
 # =========================
 # データ取得
@@ -223,7 +371,9 @@ if "input_note" not in st.session_state:
 # =========================
 # 入力エリア
 # =========================
-st.subheader("入力")
+st.markdown('<div class="section-card">', unsafe_allow_html=True)
+st.markdown('<div class="section-title">入力</div>', unsafe_allow_html=True)
+st.markdown('<div class="help-text">通常入力は本日分、過去入力は日付を指定して登録できます。</div>', unsafe_allow_html=True)
 
 mode = st.radio("入力モード", ["通常入力", "過去入力"], horizontal=True, key="input_mode")
 
@@ -250,15 +400,9 @@ with col2:
     category = st.selectbox("用件", CATEGORY_OPTIONS, key="input_category")
     note = st.text_input("備考", key="input_note")
 
-# =========================
-# メッセージ表示エリア
-# =========================
 message_area = st.empty()
 
-# =========================
-# 追加処理
-# =========================
-if st.button("追加"):
+if st.button("＋ 追加する", use_container_width=True):
     max_number = pd.to_numeric(df["番号"], errors="coerce").max()
     start_number = int(max_number) + 1 if pd.notna(max_number) else 1
 
@@ -286,24 +430,19 @@ if st.button("追加"):
     st.session_state["reset_form"] = True
     st.rerun()
 
-# =========================
-# 追加メッセージ表示
-# =========================
 if st.session_state.get("added"):
     added_count = st.session_state.get("added_count", 1)
     message_area.success(f"✅ {added_count}件追加しました")
     st.session_state["added"] = False
     st.session_state["added_count"] = 1
 
-# =========================
-# 区切り
-# =========================
-st.divider()
+st.markdown('</div>', unsafe_allow_html=True)
 
 # =========================
 # 履歴エリア
 # =========================
-st.subheader("履歴")
+st.markdown('<div class="section-card">', unsafe_allow_html=True)
+st.markdown('<div class="section-title">履歴</div>', unsafe_allow_html=True)
 
 view_date = st.date_input("表示する日付", value=today_jst(), key="view_date")
 view_date_str = str(view_date)
@@ -313,14 +452,26 @@ df_view = df[df["日付"] == view_date_str]
 if not df_view.empty:
     df_display = df_view.sort_index(ascending=False).reset_index()
 
-    with st.container(height=260):
+    with st.container(height=300):
         for i, row in df_display.iterrows():
-            col1, col2 = st.columns([8, 1])
+            col1, col2 = st.columns([9, 1])
 
             with col1:
                 registered_at = row["登録日時"] if pd.notna(row["登録日時"]) else ""
-                st.write(
-                    f"{row['日付']} | {row['担当者']} | {row['エリア']} | {row['相手']} | {int(row['対応時間（分）'])}分 | {row['用件']} | {registered_at}"
+                note_text = row["備考"] if pd.notna(row["備考"]) and str(row["備考"]).strip() != "" else "なし"
+
+                st.markdown(
+                    f"""
+                    <div class="log-row">
+                        <div class="log-main">
+                            {row['日付']} ｜ {row['担当者']} ｜ {row['エリア']} → {row['相手']} ｜ {int(row['対応時間（分）'])}分
+                        </div>
+                        <div class="log-sub">
+                            用件：{row['用件']}　｜　備考：{note_text}　｜　登録日時：{registered_at}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
                 )
 
             with col2:
@@ -333,8 +484,17 @@ if not df_view.empty:
     h = total // 60
     m = total % 60
 
-    st.subheader("合計")
-    st.write(f"{total}分（{h}時間{m}分）")
+    st.markdown(
+        f"""
+        <div class="total-box">
+            <div class="total-label">表示日の合計対応時間</div>
+            <div class="total-value">{total}分（{h}時間{m}分）</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 else:
     st.info("この日のデータはありません")
+
+st.markdown('</div>', unsafe_allow_html=True)
