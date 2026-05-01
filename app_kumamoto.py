@@ -76,16 +76,16 @@ PARTNER_OPTIONS_BY_AREA = {
 CATEGORY_OPTIONS = [
     "注文",
     "商品問合せ",
-    "納期依頼",
+    "納期確認",
     "見積依頼",
-    "返品依頼",
+    "返品関連",
     "伝票確認",
     "在庫確認",
     "請求書関連",
     "その他"
 ]
 
-HEADER_COLUMNS = ["日付", "番号", "担当者", "エリア", "相手", "対応時間（分）", "要件", "備考", "登録日時"]
+HEADER_COLUMNS = ["日付", "番号", "担当者", "エリア", "相手", "対応時間（分）", "用件", "備考", "登録日時"]
 
 # =========================
 # 接続キャッシュ
@@ -124,6 +124,14 @@ def load_data():
 
     if df.empty:
         df = pd.DataFrame(columns=HEADER_COLUMNS)
+
+    # 旧ヘッダー「要件」でも読み込めるようにする
+    if "用件" not in df.columns and "要件" in df.columns:
+        df["用件"] = df["要件"]
+
+    # 「要件」と「用件」が両方ある場合は、用件が空なら要件から補完
+    if "用件" in df.columns and "要件" in df.columns:
+        df["用件"] = df["用件"].replace("", pd.NA).fillna(df["要件"])
 
     for col in HEADER_COLUMNS:
         if col not in df.columns:
@@ -239,7 +247,7 @@ with col1:
     count = st.number_input("件数", min_value=1, step=1, key="input_count")
 
 with col2:
-    category = st.selectbox("要件", CATEGORY_OPTIONS, key="input_category")
+    category = st.selectbox("用件", CATEGORY_OPTIONS, key="input_category")
     note = st.text_input("備考", key="input_note")
 
 # =========================
@@ -312,7 +320,7 @@ if not df_view.empty:
             with col1:
                 registered_at = row["登録日時"] if pd.notna(row["登録日時"]) else ""
                 st.write(
-                    f"{row['日付']} | {row['担当者']} | {row['エリア']} | {row['相手']} | {int(row['対応時間（分）'])}分 | {row['要件']} | {registered_at}"
+                    f"{row['日付']} | {row['担当者']} | {row['エリア']} | {row['相手']} | {int(row['対応時間（分）'])}分 | {row['用件']} | {registered_at}"
                 )
 
             with col2:
