@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import altair as alt
 from datetime import datetime, date
 from zoneinfo import ZoneInfo
 import calendar
@@ -140,6 +141,7 @@ st.markdown("""
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
     font-weight: 950;
+    line-height: 1.25;
 }
 
 .metric-sub {
@@ -751,6 +753,63 @@ def format_minutes(total_minutes):
     m = total_minutes % 60
     return f"{total_minutes:,}分（{h}時間{m}分）"
 
+def horizontal_bar_chart(df, label_col, value_col, title="", top_n=20):
+    if df is None or df.empty:
+        st.info("表示できるデータがありません")
+        return
+
+    chart_df = df[[label_col, value_col]].copy()
+    chart_df[value_col] = pd.to_numeric(chart_df[value_col], errors="coerce").fillna(0)
+    chart_df = chart_df.sort_values(value_col, ascending=False).head(top_n)
+
+    if chart_df.empty:
+        st.info("表示できるデータがありません")
+        return
+
+    height = max(260, min(720, 34 * len(chart_df) + 70))
+
+    base = alt.Chart(chart_df).encode(
+        y=alt.Y(
+            f"{label_col}:N",
+            sort=alt.SortField(field=value_col, order="descending"),
+            title=None,
+            axis=alt.Axis(labelLimit=220)
+        ),
+        x=alt.X(
+            f"{value_col}:Q",
+            title=value_col,
+            axis=alt.Axis(format=",")
+        ),
+        tooltip=[
+            alt.Tooltip(f"{label_col}:N", title=label_col),
+            alt.Tooltip(f"{value_col}:Q", title=value_col, format=",")
+        ]
+    )
+
+    bars = base.mark_bar(cornerRadiusEnd=4)
+
+    text = base.mark_text(
+        align="left",
+        baseline="middle",
+        dx=4,
+        fontSize=12
+    ).encode(
+        text=alt.Text(f"{value_col}:Q", format=",")
+    )
+
+    chart = (bars + text).properties(
+        title=title,
+        height=height
+    ).configure_title(
+        fontSize=16,
+        anchor="start"
+    ).configure_axis(
+        labelFontSize=12,
+        titleFontSize=12
+    )
+
+    st.altair_chart(chart, use_container_width=True)
+
 def reset_input_fields():
     st.session_state["input_mode"] = "通常入力"
     st.session_state["input_selected_date"] = today_jst()
@@ -943,11 +1002,11 @@ def render_admin_dashboard():
 
         with col_a:
             st.subheader("担当者別 件数")
-            st.bar_chart(staff_summary.set_index("担当者")["件数"])
+            horizontal_bar_chart(staff_summary, "担当者", "件数", "担当者別 件数", top_n=20)
 
         with col_b:
             st.subheader("担当者別 分数")
-            st.bar_chart(staff_summary.set_index("担当者")["分数"])
+            horizontal_bar_chart(staff_summary, "担当者", "分数", "担当者別 分数", top_n=20)
 
         st.subheader("担当者別一覧")
         safe_dataframe(staff_summary)
@@ -1036,10 +1095,12 @@ def render_admin_dashboard():
         col_a, col_b = st.columns(2)
 
         with col_a:
-            st.bar_chart(area_summary.set_index("エリア")["件数"])
+            st.subheader("相手エリア別 件数")
+            horizontal_bar_chart(area_summary, "エリア", "件数", "相手エリア別 件数", top_n=20)
 
         with col_b:
-            st.bar_chart(area_summary.set_index("エリア")["分数"])
+            st.subheader("相手エリア別 分数")
+            horizontal_bar_chart(area_summary, "エリア", "分数", "相手エリア別 分数", top_n=20)
 
         st.subheader("相手エリア別一覧")
         safe_dataframe(area_summary)
@@ -1067,11 +1128,11 @@ def render_admin_dashboard():
 
         with col_a:
             st.subheader("相手別 件数")
-            st.bar_chart(partner_summary.set_index("相手")["件数"])
+            horizontal_bar_chart(partner_summary, "相手", "件数", "相手別 件数 上位20", top_n=20)
 
         with col_b:
             st.subheader("相手別 分数")
-            st.bar_chart(partner_summary.set_index("相手")["分数"])
+            horizontal_bar_chart(partner_summary, "相手", "分数", "相手別 分数 上位20", top_n=20)
 
         st.subheader("相手別一覧")
         safe_dataframe(partner_summary)
@@ -1145,11 +1206,11 @@ def render_admin_dashboard():
 
         with col_a:
             st.subheader("用件別 件数")
-            st.bar_chart(category_summary.set_index("用件")["件数"])
+            horizontal_bar_chart(category_summary, "用件", "件数", "用件別 件数", top_n=20)
 
         with col_b:
             st.subheader("用件別 分数")
-            st.bar_chart(category_summary.set_index("用件")["分数"])
+            horizontal_bar_chart(category_summary, "用件", "分数", "用件別 分数", top_n=20)
 
         st.subheader("用件別一覧")
         safe_dataframe(category_summary)
