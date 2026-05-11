@@ -666,12 +666,9 @@ def normalize_log_df(df, source_name):
     df["日付変換"] = pd.to_datetime(df["日付"], errors="coerce")
     df["受付側"] = source_name
 
-    df["担当者"] = df["担当者"].astype(str).replace("nan", "")
-    df["エリア"] = df["エリア"].astype(str).replace("nan", "")
-    df["相手"] = df["相手"].astype(str).replace("nan", "")
-    df["用件"] = df["用件"].astype(str).replace("nan", "")
-    df["備考"] = df["備考"].astype(str).replace("nan", "")
-    df["登録日時"] = df["登録日時"].astype(str).replace("nan", "")
+    text_cols = ["担当者", "エリア", "相手", "用件", "備考", "登録日時"]
+    for col in text_cols:
+        df[col] = df[col].astype(str).replace("nan", "")
 
     return df
 
@@ -709,8 +706,20 @@ def load_optional_sheet(worksheet_name):
     except WorksheetNotFound:
         return pd.DataFrame()
 
-    data = ws.get_all_records()
-    return pd.DataFrame(data)
+    values = ws.get_all_values()
+
+    if not values:
+        return pd.DataFrame()
+
+    max_cols = max(len(row) for row in values)
+    normalized_values = []
+
+    for row in values:
+        normalized_values.append(row + [""] * (max_cols - len(row)))
+
+    df = pd.DataFrame(normalized_values)
+
+    return df
 
 # =========================
 # 共通表示部品
@@ -731,7 +740,10 @@ def safe_dataframe(df, use_container_width=True, height=None):
     if df is None or df.empty:
         st.info("表示できるデータがありません")
     else:
-        st.dataframe(df, use_container_width=use_container_width, height=height)
+        if height is None:
+            st.dataframe(df, use_container_width=use_container_width)
+        else:
+            st.dataframe(df, use_container_width=use_container_width, height=height)
 
 def format_minutes(total_minutes):
     total_minutes = int(total_minutes)
@@ -784,6 +796,7 @@ def render_admin_dashboard():
         return
 
     df_all = df_all.dropna(subset=["日付変換"]).copy()
+
     df_month = df_all[
         (df_all["日付変換"].dt.date >= month_start) &
         (df_all["日付変換"].dt.date <= month_end)
@@ -801,7 +814,7 @@ def render_admin_dashboard():
     # =========================
     admin_menu = st.radio(
         "表示内容",
-        ["概要", "担当者", "エリア分析", "用件分析", "詳細表"],
+        ["概要", "担当者", "エリア分析", "用件分析", "月次サマリー", "詳細表"],
         horizontal=True
     )
 
@@ -868,13 +881,13 @@ def render_admin_dashboard():
                 分数=("対応時間（分）", "sum")
             )
             .reset_index()
-            .rename(columns={"日付変換": "日付"})
         )
 
         daily = daily.rename(columns={"日付変換": "日付"})
-        daily["日付"] = daily.iloc[:, 0]
-        daily = daily[["日付", "件数", "分数"]]
+        if "日付" not in daily.columns:
+            daily = daily.rename(columns={daily.columns[0]: "日付"})
 
+        daily = daily[["日付", "件数", "分数"]]
         chart_df = daily.set_index("日付")
 
         col_a, col_b = st.columns(2)
@@ -991,7 +1004,7 @@ def render_admin_dashboard():
         st.subheader("受付側 × 相手エリア：分数")
         safe_dataframe(area_cross_minutes.reset_index())
 
-        st.subheader("相手エリア別 件数")
+        st.subheader("相手エリア別 件数・分数")
         area_summary = (
             df_month
             .groupby("エリア")
@@ -1060,6 +1073,17 @@ def render_admin_dashboard():
         )
 
         safe_dataframe(source_category.reset_index())
+
+    # =========================
+    # 月次サマリー
+    # =========================
+    elif admin_menu == "月次サマリー":
+        st.markdown('<div class="section-title">月次サマリー</div>', unsafe_allow_html=True)
+
+        st.info("スプレッドシートの「月次サマリー」シートを、そのまま表示しています。")
+
+        df_month_summary = load_optional_sheet("月次サマリー")
+        safe_dataframe(df_month_summary, height=620)
 
     # =========================
     # 詳細表
