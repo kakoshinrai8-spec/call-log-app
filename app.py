@@ -831,7 +831,7 @@ def render_admin_dashboard():
     # =========================
     admin_menu = st.radio(
         "表示内容",
-        ["概要", "担当者", "エリア分析", "用件分析", "月次サマリー", "詳細表"],
+        ["概要", "担当者", "エリア分析", "相手別分析", "用件分析", "月次サマリー", "詳細表"],
         horizontal=True
     )
 
@@ -1043,6 +1043,84 @@ def render_admin_dashboard():
 
         st.subheader("相手エリア別一覧")
         safe_dataframe(area_summary)
+
+    # =========================
+    # 相手別分析
+    # =========================
+    elif admin_menu == "相手別分析":
+        st.markdown('<div class="section-title">相手別分析</div>', unsafe_allow_html=True)
+
+        partner_summary = (
+            df_month
+            .groupby("相手")
+            .agg(
+                件数=("日付", "count"),
+                分数=("対応時間（分）", "sum")
+            )
+            .reset_index()
+            .sort_values(["件数", "分数"], ascending=False)
+        )
+
+        partner_summary["平均分数"] = (partner_summary["分数"] / partner_summary["件数"]).round(1)
+
+        col_a, col_b = st.columns(2)
+
+        with col_a:
+            st.subheader("相手別 件数")
+            st.bar_chart(partner_summary.set_index("相手")["件数"])
+
+        with col_b:
+            st.subheader("相手別 分数")
+            st.bar_chart(partner_summary.set_index("相手")["分数"])
+
+        st.subheader("相手別一覧")
+        safe_dataframe(partner_summary)
+
+        st.markdown('<div class="section-title">受付側 × 相手</div>', unsafe_allow_html=True)
+
+        source_partner_count = pd.pivot_table(
+            df_month,
+            index="相手",
+            columns="受付側",
+            values="日付",
+            aggfunc="count",
+            fill_value=0,
+            margins=True,
+            margins_name="合計"
+        )
+
+        st.subheader("受付側 × 相手：件数")
+        safe_dataframe(source_partner_count.reset_index())
+
+        source_partner_minutes = pd.pivot_table(
+            df_month,
+            index="相手",
+            columns="受付側",
+            values="対応時間（分）",
+            aggfunc="sum",
+            fill_value=0,
+            margins=True,
+            margins_name="合計"
+        )
+
+        st.subheader("受付側 × 相手：分数")
+        safe_dataframe(source_partner_minutes.reset_index())
+
+        st.markdown('<div class="section-title">相手 × 用件</div>', unsafe_allow_html=True)
+
+        partner_category = pd.pivot_table(
+            df_month,
+            index="相手",
+            columns="用件",
+            values="日付",
+            aggfunc="count",
+            fill_value=0,
+            margins=True,
+            margins_name="合計"
+        )
+
+        st.subheader("相手 × 用件：件数")
+        safe_dataframe(partner_category.reset_index())
 
     # =========================
     # 用件分析
