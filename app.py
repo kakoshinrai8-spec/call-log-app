@@ -25,7 +25,7 @@ def now_jst_str():
 st.markdown("""
 <style>
 .stApp {
-    background: #eef2f7;
+    background: #eef2f7 !important;
     color: #0f172a !important;
 }
 
@@ -35,17 +35,24 @@ st.markdown("""
     max-width: 1180px;
 }
 
+/* =========================
+   ヘッダー
+   ========================= */
 .app-header {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 48%, #334155 100%);
-    color: white !important;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 48%, #334155 100%) !important;
+    color: #ffffff !important;
     padding: 26px 30px;
     border-radius: 22px;
     margin-bottom: 22px;
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
 }
 
-.app-header * {
-    color: white !important;
+.app-header,
+.app-header *,
+.app-title,
+.app-subtitle {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 .app-title {
@@ -62,8 +69,9 @@ st.markdown("""
 
 .staff-badge {
     display: inline-block;
-    background: #e0e7ff;
+    background: #e0e7ff !important;
     color: #312e81 !important;
+    -webkit-text-fill-color: #312e81 !important;
     padding: 9px 16px;
     border-radius: 999px;
     font-weight: 800;
@@ -72,7 +80,7 @@ st.markdown("""
 }
 
 .section-card {
-    background: #ffffff;
+    background: #ffffff !important;
     color: #0f172a !important;
     padding: 22px 24px;
     border-radius: 20px;
@@ -89,6 +97,7 @@ st.markdown("""
     font-size: 20px;
     font-weight: 850;
     color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
     margin-bottom: 14px;
     border-left: 6px solid #2563eb;
     padding-left: 10px;
@@ -97,6 +106,7 @@ st.markdown("""
 .help-text {
     font-size: 13px;
     color: #64748b !important;
+    -webkit-text-fill-color: #64748b !important;
     margin-top: -6px;
     margin-bottom: 14px;
 }
@@ -104,9 +114,9 @@ st.markdown("""
 /* =========================
    ダークモード文字消え対策
    ========================= */
-
-/* Streamlitの基本文字 */
-html, body, .stApp,
+html,
+body,
+.stApp,
 div[data-testid="stAppViewContainer"],
 div[data-testid="stMarkdownContainer"],
 div[data-testid="stMarkdownContainer"] *,
@@ -125,10 +135,13 @@ div[data-testid="stRadio"] label,
 div[data-testid="stTextArea"] label {
     font-weight: 800 !important;
     color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
     opacity: 1 !important;
 }
 
-/* 入力欄・プルダウン・日付欄 */
+/* =========================
+   入力欄・プルダウン・日付欄
+   ========================= */
 div[data-baseweb="select"] > div,
 div[data-baseweb="input"] > div,
 div[data-baseweb="textarea"] > div {
@@ -136,6 +149,8 @@ div[data-baseweb="textarea"] > div {
     border: 1.5px solid #cbd5e1 !important;
     border-radius: 12px !important;
     color: #0f172a !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 div[data-baseweb="select"] > div:hover,
@@ -155,6 +170,8 @@ div[data-baseweb="textarea"] textarea {
     font-weight: 650 !important;
     -webkit-text-fill-color: #0f172a !important;
     opacity: 1 !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 /* placeholder */
@@ -163,6 +180,27 @@ textarea::placeholder {
     color: #64748b !important;
     opacity: 1 !important;
     -webkit-text-fill-color: #64748b !important;
+}
+
+/* 入力フォームの黒枠・フォーカス枠対策 */
+input,
+textarea,
+div[data-baseweb="select"] > div,
+div[data-baseweb="input"] > div,
+div[data-baseweb="textarea"] > div {
+    border-color: #cbd5e1 !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+input:focus,
+textarea:focus,
+div[data-baseweb="select"] > div:focus,
+div[data-baseweb="input"] > div:focus-within,
+div[data-baseweb="textarea"] > div:focus-within {
+    border-color: #2563eb !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18) !important;
 }
 
 /* selectbox の表示文字・矢印・中身 */
@@ -187,9 +225,12 @@ li[role="option"]:hover,
 div[data-baseweb="menu"] li:hover {
     background-color: #eaf1ff !important;
     color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
 }
 
-/* radio */
+/* =========================
+   radio
+   ========================= */
 div[data-testid="stRadio"] > div {
     gap: 12px;
 }
@@ -200,6 +241,7 @@ div[data-testid="stRadio"] label {
     padding: 8px 12px !important;
     border-radius: 999px !important;
     color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
     opacity: 1 !important;
 }
 
@@ -209,6 +251,7 @@ div[role="radiogroup"] *,
 div[data-baseweb="radio"],
 div[data-baseweb="radio"] * {
     color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
     opacity: 1 !important;
 }
 
@@ -216,7 +259,6 @@ div[data-baseweb="radio"] * {
    number_input の + / - ボタン補正
    ダークモードで黒くなる対策
    ========================= */
-
 div[data-testid="stNumberInput"] {
     color: #0f172a !important;
 }
@@ -227,6 +269,8 @@ div[data-testid="stNumberInput"] input {
     background-color: #ffffff !important;
     -webkit-text-fill-color: #0f172a !important;
     opacity: 1 !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 /* number_input 全体の枠 */
@@ -234,12 +278,22 @@ div[data-testid="stNumberInput"] div[data-baseweb="input"] > div {
     background-color: #ffffff !important;
     border: 1.5px solid #cbd5e1 !important;
     color: #0f172a !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* number_input フォーカス時 */
+div[data-testid="stNumberInput"] div[data-baseweb="input"] > div:focus-within {
+    border-color: #2563eb !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18) !important;
 }
 
 /* + / - ボタン部分 */
 div[data-testid="stNumberInput"] button {
     background-color: #e2e8f0 !important;
     color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
     border: 1px solid #cbd5e1 !important;
     box-shadow: none !important;
 }
@@ -256,16 +310,30 @@ div[data-testid="stNumberInput"] button svg path {
 div[data-testid="stNumberInput"] button:hover {
     background-color: #cbd5e1 !important;
     color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
 }
 
 /* disabled時 */
 div[data-testid="stNumberInput"] button:disabled {
     background-color: #f1f5f9 !important;
     color: #94a3b8 !important;
+    -webkit-text-fill-color: #94a3b8 !important;
     border: 1px solid #cbd5e1 !important;
 }
 
 /* date input / calendar */
+div[data-testid="stDateInput"] div[data-baseweb="input"] > div {
+    border-color: #cbd5e1 !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+div[data-testid="stDateInput"] div[data-baseweb="input"] > div:focus-within {
+    border-color: #2563eb !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18) !important;
+}
+
 div[data-baseweb="calendar"],
 div[data-baseweb="calendar"] *,
 div[data-baseweb="datepicker"],
@@ -283,24 +351,31 @@ div[data-baseweb="datepicker"] * {
     -webkit-text-fill-color: #475569 !important;
 }
 
-/* メインボタン：決定・追加する */
+/* =========================
+   メインボタン：決定・追加する
+   ========================= */
 .stButton > button[kind="primary"] {
     border-radius: 14px;
     font-weight: 900;
     min-height: 44px;
     border: none !important;
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
-    color: white !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
 }
 
-.stButton > button[kind="primary"] * {
-    color: white !important;
+.stButton > button[kind="primary"] *,
+.stButton > button[kind="primary"] p,
+.stButton > button[kind="primary"] span {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 .stButton > button[kind="primary"]:hover {
     background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
-    color: white !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     border: none !important;
     transform: translateY(-1px);
     box-shadow: 0 10px 22px rgba(37, 99, 235, 0.34);
@@ -317,23 +392,30 @@ div[data-baseweb="datepicker"] * {
     min-height: 40px;
     border: none !important;
     background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
-    color: white !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     box-shadow: 0 6px 14px rgba(220, 38, 38, 0.25);
 }
 
-.stButton > button[kind="secondary"] * {
-    color: white !important;
+.stButton > button[kind="secondary"] *,
+.stButton > button[kind="secondary"] p,
+.stButton > button[kind="secondary"] span {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 .stButton > button[kind="secondary"]:hover {
     background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%) !important;
-    color: white !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     border: none !important;
 }
 
-/* 履歴カード */
+/* =========================
+   履歴カード
+   ========================= */
 .log-row {
-    background: #ffffff;
+    background: #ffffff !important;
     border: 1px solid #dbe3ef;
     border-left: 6px solid #2563eb;
     border-radius: 16px;
@@ -345,28 +427,36 @@ div[data-baseweb="datepicker"] * {
 .log-main {
     font-weight: 850;
     color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
     font-size: 15px;
 }
 
 .log-sub {
     font-size: 13px;
     color: #475569 !important;
+    -webkit-text-fill-color: #475569 !important;
     margin-top: 5px;
     line-height: 1.5;
 }
 
-/* 合計 */
+/* =========================
+   合計
+   ========================= */
 .total-box {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    color: white !important;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    color: #ffffff !important;
     border-radius: 20px;
     padding: 20px 24px;
     margin-top: 16px;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
 }
 
-.total-box * {
-    color: white !important;
+.total-box,
+.total-box *,
+.total-label,
+.total-value {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 .total-label {
@@ -392,6 +482,19 @@ div[data-testid="stAlert"],
 div[data-testid="stAlert"] * {
     color: #0f172a !important;
     opacity: 1 !important;
+}
+
+/* StreamlitのClear caches等の管理ポップアップ補正 */
+div[role="dialog"],
+div[role="dialog"] * {
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+}
+
+div[role="dialog"] button,
+div[role="dialog"] button * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 </style>
 """, unsafe_allow_html=True)
