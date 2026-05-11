@@ -212,11 +212,57 @@ div[data-baseweb="radio"] * {
     opacity: 1 !important;
 }
 
-/* number_input の +/- ボタン周辺 */
-div[data-testid="stNumberInput"] *,
-div[data-baseweb="input"] * {
+/* =========================
+   number_input の + / - ボタン補正
+   ダークモードで黒くなる対策
+   ========================= */
+
+div[data-testid="stNumberInput"] {
     color: #0f172a !important;
+}
+
+/* number_input 入力欄 */
+div[data-testid="stNumberInput"] input {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #0f172a !important;
     opacity: 1 !important;
+}
+
+/* number_input 全体の枠 */
+div[data-testid="stNumberInput"] div[data-baseweb="input"] > div {
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+/* + / - ボタン部分 */
+div[data-testid="stNumberInput"] button {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+}
+
+/* + / - ボタン内のアイコン */
+div[data-testid="stNumberInput"] button svg,
+div[data-testid="stNumberInput"] button svg path {
+    color: #0f172a !important;
+    fill: #0f172a !important;
+    stroke: #0f172a !important;
+}
+
+/* hover時 */
+div[data-testid="stNumberInput"] button:hover {
+    background-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+/* disabled時 */
+div[data-testid="stNumberInput"] button:disabled {
+    background-color: #f1f5f9 !important;
+    color: #94a3b8 !important;
+    border: 1px solid #cbd5e1 !important;
 }
 
 /* date input / calendar */
