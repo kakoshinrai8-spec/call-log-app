@@ -26,6 +26,7 @@ st.markdown("""
 <style>
 .stApp {
     background: #eef2f7;
+    color: #0f172a !important;
 }
 
 .block-container {
@@ -36,11 +37,15 @@ st.markdown("""
 
 .app-header {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 48%, #334155 100%);
-    color: white;
+    color: white !important;
     padding: 26px 30px;
     border-radius: 22px;
     margin-bottom: 22px;
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
+}
+
+.app-header * {
+    color: white !important;
 }
 
 .app-title {
@@ -58,7 +63,7 @@ st.markdown("""
 .staff-badge {
     display: inline-block;
     background: #e0e7ff;
-    color: #312e81;
+    color: #312e81 !important;
     padding: 9px 16px;
     border-radius: 999px;
     font-weight: 800;
@@ -68,6 +73,7 @@ st.markdown("""
 
 .section-card {
     background: #ffffff;
+    color: #0f172a !important;
     padding: 22px 24px;
     border-radius: 20px;
     box-shadow: 0 8px 22px rgba(15, 23, 42, 0.10);
@@ -75,10 +81,14 @@ st.markdown("""
     margin-bottom: 22px;
 }
 
+.section-card * {
+    color: #0f172a;
+}
+
 .section-title {
     font-size: 20px;
     font-weight: 850;
-    color: #0f172a;
+    color: #0f172a !important;
     margin-bottom: 14px;
     border-left: 6px solid #2563eb;
     padding-left: 10px;
@@ -86,9 +96,36 @@ st.markdown("""
 
 .help-text {
     font-size: 13px;
-    color: #64748b;
+    color: #64748b !important;
     margin-top: -6px;
     margin-bottom: 14px;
+}
+
+/* =========================
+   ダークモード文字消え対策
+   ========================= */
+
+/* Streamlitの基本文字 */
+html, body, .stApp,
+div[data-testid="stAppViewContainer"],
+div[data-testid="stMarkdownContainer"],
+div[data-testid="stMarkdownContainer"] *,
+div[data-testid="stWidgetLabel"],
+div[data-testid="stWidgetLabel"] * {
+    color: #0f172a !important;
+}
+
+/* ラベル */
+label,
+div[data-testid="stSelectbox"] label,
+div[data-testid="stNumberInput"] label,
+div[data-testid="stTextInput"] label,
+div[data-testid="stDateInput"] label,
+div[data-testid="stRadio"] label,
+div[data-testid="stTextArea"] label {
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    opacity: 1 !important;
 }
 
 /* 入力欄・プルダウン・日付欄 */
@@ -98,6 +135,7 @@ div[data-baseweb="textarea"] > div {
     background-color: #f8fafc !important;
     border: 1.5px solid #cbd5e1 !important;
     border-radius: 12px !important;
+    color: #0f172a !important;
 }
 
 div[data-baseweb="select"] > div:hover,
@@ -106,20 +144,97 @@ div[data-baseweb="textarea"] > div:hover {
     border-color: #2563eb !important;
 }
 
+/* 入力欄の中の文字 */
+input,
+textarea,
 div[data-baseweb="select"] input,
 div[data-baseweb="input"] input,
-textarea {
+div[data-baseweb="textarea"] textarea {
     color: #0f172a !important;
+    background-color: #f8fafc !important;
     font-weight: 650 !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
 }
 
-/* ラベル */
-div[data-testid="stSelectbox"] label,
-div[data-testid="stNumberInput"] label,
-div[data-testid="stTextInput"] label,
-div[data-testid="stDateInput"] label {
-    font-weight: 800;
-    color: #0f172a;
+/* placeholder */
+input::placeholder,
+textarea::placeholder {
+    color: #64748b !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #64748b !important;
+}
+
+/* selectbox の表示文字・矢印・中身 */
+div[data-baseweb="select"],
+div[data-baseweb="select"] *,
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] *,
+div[data-baseweb="menu"],
+div[data-baseweb="menu"] *,
+ul[role="listbox"],
+ul[role="listbox"] *,
+li[role="option"],
+li[role="option"] * {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+}
+
+/* selectbox候補 hover */
+li[role="option"]:hover,
+div[data-baseweb="menu"] li:hover {
+    background-color: #eaf1ff !important;
+    color: #0f172a !important;
+}
+
+/* radio */
+div[data-testid="stRadio"] > div {
+    gap: 12px;
+}
+
+div[data-testid="stRadio"] label {
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px 12px !important;
+    border-radius: 999px !important;
+    color: #0f172a !important;
+    opacity: 1 !important;
+}
+
+div[data-testid="stRadio"] *,
+div[role="radiogroup"],
+div[role="radiogroup"] *,
+div[data-baseweb="radio"],
+div[data-baseweb="radio"] * {
+    color: #0f172a !important;
+    opacity: 1 !important;
+}
+
+/* number_input の +/- ボタン周辺 */
+div[data-testid="stNumberInput"] *,
+div[data-baseweb="input"] * {
+    color: #0f172a !important;
+    opacity: 1 !important;
+}
+
+/* date input / calendar */
+div[data-baseweb="calendar"],
+div[data-baseweb="calendar"] *,
+div[data-baseweb="datepicker"],
+div[data-baseweb="datepicker"] * {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #0f172a !important;
+}
+
+/* disabledでも文字が消えないように */
+[disabled],
+[aria-disabled="true"] {
+    color: #475569 !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #475569 !important;
 }
 
 /* メインボタン：決定・追加する */
@@ -131,6 +246,10 @@ div[data-testid="stDateInput"] label {
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
     color: white !important;
     box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
+}
+
+.stButton > button[kind="primary"] * {
+    color: white !important;
 }
 
 .stButton > button[kind="primary"]:hover {
@@ -156,22 +275,14 @@ div[data-testid="stDateInput"] label {
     box-shadow: 0 6px 14px rgba(220, 38, 38, 0.25);
 }
 
+.stButton > button[kind="secondary"] * {
+    color: white !important;
+}
+
 .stButton > button[kind="secondary"]:hover {
     background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%) !important;
     color: white !important;
     border: none !important;
-}
-
-/* ラジオボタン */
-div[data-testid="stRadio"] > div {
-    gap: 12px;
-}
-
-div[data-testid="stRadio"] label {
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    padding: 8px 12px;
-    border-radius: 999px;
 }
 
 /* 履歴カード */
@@ -187,13 +298,13 @@ div[data-testid="stRadio"] label {
 
 .log-main {
     font-weight: 850;
-    color: #0f172a;
+    color: #0f172a !important;
     font-size: 15px;
 }
 
 .log-sub {
     font-size: 13px;
-    color: #475569;
+    color: #475569 !important;
     margin-top: 5px;
     line-height: 1.5;
 }
@@ -201,11 +312,15 @@ div[data-testid="stRadio"] label {
 /* 合計 */
 .total-box {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    color: white;
+    color: white !important;
     border-radius: 20px;
     padding: 20px 24px;
     margin-top: 16px;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+}
+
+.total-box * {
+    color: white !important;
 }
 
 .total-label {
@@ -222,6 +337,15 @@ div[data-testid="stRadio"] label {
 hr {
     margin-top: 1.2rem;
     margin-bottom: 1.2rem;
+}
+
+/* alert/info/success系 */
+.stAlert,
+.stAlert *,
+div[data-testid="stAlert"],
+div[data-testid="stAlert"] * {
+    color: #0f172a !important;
+    opacity: 1 !important;
 }
 </style>
 """, unsafe_allow_html=True)
