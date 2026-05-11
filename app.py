@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, date
 from zoneinfo import ZoneInfo
+import calendar
 import gspread
 from gspread.exceptions import WorksheetNotFound
 from google.oauth2.service_account import Credentials
@@ -18,6 +19,12 @@ def today_jst():
 
 def now_jst_str():
     return datetime.now(JST).strftime("%Y-%m-%d %H:%M:%S")
+
+def month_start_end(target_date):
+    first_day = date(target_date.year, target_date.month, 1)
+    last_day_num = calendar.monthrange(target_date.year, target_date.month)[1]
+    last_day = date(target_date.year, target_date.month, last_day_num)
+    return first_day, last_day
 
 # =========================
 # デザイン設定
@@ -109,6 +116,48 @@ st.markdown("""
     -webkit-text-fill-color: #64748b !important;
     margin-top: -6px;
     margin-bottom: 14px;
+}
+
+.metric-card {
+    background: #f8fafc !important;
+    border: 1px solid #dbe3ef;
+    border-radius: 18px;
+    padding: 18px 18px;
+    box-shadow: 0 5px 14px rgba(15, 23, 42, 0.06);
+    min-height: 104px;
+}
+
+.metric-label {
+    font-size: 13px;
+    color: #64748b !important;
+    -webkit-text-fill-color: #64748b !important;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.metric-value {
+    font-size: 28px;
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    font-weight: 950;
+}
+
+.metric-sub {
+    font-size: 12px;
+    color: #64748b !important;
+    -webkit-text-fill-color: #64748b !important;
+    margin-top: 4px;
+}
+
+.admin-notice {
+    background: #eff6ff !important;
+    border: 1px solid #bfdbfe;
+    border-left: 6px solid #2563eb;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 700;
 }
 
 /* =========================
@@ -257,13 +306,11 @@ div[data-baseweb="radio"] * {
 
 /* =========================
    number_input の + / - ボタン補正
-   ダークモードで黒くなる対策
    ========================= */
 div[data-testid="stNumberInput"] {
     color: #0f172a !important;
 }
 
-/* number_input 入力欄 */
 div[data-testid="stNumberInput"] input {
     color: #0f172a !important;
     background-color: #ffffff !important;
@@ -273,7 +320,6 @@ div[data-testid="stNumberInput"] input {
     box-shadow: none !important;
 }
 
-/* number_input 全体の枠 */
 div[data-testid="stNumberInput"] div[data-baseweb="input"] > div {
     background-color: #ffffff !important;
     border: 1.5px solid #cbd5e1 !important;
@@ -282,14 +328,12 @@ div[data-testid="stNumberInput"] div[data-baseweb="input"] > div {
     box-shadow: none !important;
 }
 
-/* number_input フォーカス時 */
 div[data-testid="stNumberInput"] div[data-baseweb="input"] > div:focus-within {
     border-color: #2563eb !important;
     outline: none !important;
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18) !important;
 }
 
-/* + / - ボタン部分 */
 div[data-testid="stNumberInput"] button {
     background-color: #e2e8f0 !important;
     color: #0f172a !important;
@@ -298,7 +342,6 @@ div[data-testid="stNumberInput"] button {
     box-shadow: none !important;
 }
 
-/* + / - ボタン内のアイコン */
 div[data-testid="stNumberInput"] button svg,
 div[data-testid="stNumberInput"] button svg path {
     color: #0f172a !important;
@@ -306,14 +349,12 @@ div[data-testid="stNumberInput"] button svg path {
     stroke: #0f172a !important;
 }
 
-/* hover時 */
 div[data-testid="stNumberInput"] button:hover {
     background-color: #cbd5e1 !important;
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
 }
 
-/* disabled時 */
 div[data-testid="stNumberInput"] button:disabled {
     background-color: #f1f5f9 !important;
     color: #94a3b8 !important;
@@ -512,7 +553,10 @@ st.markdown("""
 # =========================
 # 大分版設定
 # =========================
+SPREADSHEET_KEY = "1yjuuTEPG8rsIr8Wctl6vtFmsU0cJy0rmsbvDnvpm934"
+
 WORKSHEET_NAME = "logs"
+KUMAMOTO_WORKSHEET_NAME = "logs_熊本"
 
 STAFF_OPTIONS = ["吉田", "伊藤", "高木", "加藤", "加古", "長谷川"]
 
@@ -568,7 +612,7 @@ HEADER_COLUMNS = ["日付", "番号", "担当者", "エリア", "相手", "対�
 # 接続キャッシュ
 # =========================
 @st.cache_resource
-def get_worksheet():
+def get_spreadsheet():
     creds_dict = st.secrets["gcp_service_account"]
 
     creds = Credentials.from_service_account_info(
@@ -580,7 +624,13 @@ def get_worksheet():
     )
 
     client = gspread.authorize(creds)
-    sheet = client.open_by_key("1yjuuTEPG8rsIr8Wctl6vtFmsU0cJy0rmsbvDnvpm934")
+    sheet = client.open_by_key(SPREADSHEET_KEY)
+
+    return sheet
+
+@st.cache_resource
+def get_worksheet():
+    sheet = get_spreadsheet()
 
     try:
         ws = sheet.worksheet(WORKSHEET_NAME)
@@ -591,14 +641,9 @@ def get_worksheet():
     return ws
 
 # =========================
-# データ取得キャッシュ
+# データ整形
 # =========================
-@st.cache_data(ttl=15)
-def load_data():
-    ws = get_worksheet()
-    data = ws.get_all_records()
-    df = pd.DataFrame(data)
-
+def normalize_log_df(df, source_name):
     if df.empty:
         df = pd.DataFrame(columns=HEADER_COLUMNS)
 
@@ -614,10 +659,85 @@ def load_data():
         if col not in df.columns:
             df[col] = ""
 
-    df["対応時間（分）"] = pd.to_numeric(df["対応時間（分）"], errors="coerce").fillna(0)
+    df = df[HEADER_COLUMNS].copy()
+
+    df["対応時間（分）"] = pd.to_numeric(df["対応時間（分）"], errors="coerce").fillna(0).astype(int)
     df["番号"] = pd.to_numeric(df["番号"], errors="coerce")
+    df["日付変換"] = pd.to_datetime(df["日付"], errors="coerce")
+    df["受付側"] = source_name
+
+    df["担当者"] = df["担当者"].astype(str).replace("nan", "")
+    df["エリア"] = df["エリア"].astype(str).replace("nan", "")
+    df["相手"] = df["相手"].astype(str).replace("nan", "")
+    df["用件"] = df["用件"].astype(str).replace("nan", "")
+    df["備考"] = df["備考"].astype(str).replace("nan", "")
+    df["登録日時"] = df["登録日時"].astype(str).replace("nan", "")
 
     return df
+
+# =========================
+# データ取得キャッシュ
+# =========================
+@st.cache_data(ttl=15)
+def load_data():
+    ws = get_worksheet()
+    data = ws.get_all_records()
+    df = pd.DataFrame(data)
+
+    return normalize_log_df(df, "大分")
+
+@st.cache_data(ttl=60)
+def load_log_sheet_for_admin(worksheet_name, source_name):
+    sheet = get_spreadsheet()
+
+    try:
+        ws = sheet.worksheet(worksheet_name)
+    except WorksheetNotFound:
+        return pd.DataFrame(columns=HEADER_COLUMNS + ["日付変換", "受付側"])
+
+    data = ws.get_all_records()
+    df = pd.DataFrame(data)
+
+    return normalize_log_df(df, source_name)
+
+@st.cache_data(ttl=60)
+def load_optional_sheet(worksheet_name):
+    sheet = get_spreadsheet()
+
+    try:
+        ws = sheet.worksheet(worksheet_name)
+    except WorksheetNotFound:
+        return pd.DataFrame()
+
+    data = ws.get_all_records()
+    return pd.DataFrame(data)
+
+# =========================
+# 共通表示部品
+# =========================
+def metric_card(label, value, sub_text=""):
+    st.markdown(
+        f"""
+        <div class="metric-card">
+            <div class="metric-label">{label}</div>
+            <div class="metric-value">{value}</div>
+            <div class="metric-sub">{sub_text}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+def safe_dataframe(df, use_container_width=True, height=None):
+    if df is None or df.empty:
+        st.info("表示できるデータがありません")
+    else:
+        st.dataframe(df, use_container_width=use_container_width, height=height)
+
+def format_minutes(total_minutes):
+    total_minutes = int(total_minutes)
+    h = total_minutes // 60
+    m = total_minutes % 60
+    return f"{total_minutes:,}分（{h}時間{m}分）"
 
 def reset_input_fields():
     st.session_state["input_mode"] = "通常入力"
@@ -629,6 +749,358 @@ def reset_input_fields():
     st.session_state["input_category"] = CATEGORY_OPTIONS[0]
     st.session_state["input_note"] = ""
 
+# =========================
+# 管理者集計画面
+# =========================
+def render_admin_dashboard():
+    st.markdown('<div class="section-card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">管理者集計</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="admin-notice">この画面を開いた時点で、logs と logs_熊本 を読み込んで集計します。</div>',
+        unsafe_allow_html=True
+    )
+
+    target_month_date = st.date_input(
+        "表示対象月",
+        value=today_jst(),
+        help="選択した日付の月を対象に集計します。"
+    )
+
+    month_start, month_end = month_start_end(target_month_date)
+
+    st.caption(
+        f"対象期間：{month_start.strftime('%Y-%m-%d')} ～ {month_end.strftime('%Y-%m-%d')} / "
+        f"最終表示時刻：{now_jst_str()}"
+    )
+
+    df_oita = load_log_sheet_for_admin(WORKSHEET_NAME, "大分")
+    df_kumamoto = load_log_sheet_for_admin(KUMAMOTO_WORKSHEET_NAME, "熊本")
+
+    df_all = pd.concat([df_oita, df_kumamoto], ignore_index=True)
+
+    if df_all.empty:
+        st.info("集計対象のデータがありません")
+        st.markdown('</div>', unsafe_allow_html=True)
+        return
+
+    df_all = df_all.dropna(subset=["日付変換"]).copy()
+    df_month = df_all[
+        (df_all["日付変換"].dt.date >= month_start) &
+        (df_all["日付変換"].dt.date <= month_end)
+    ].copy()
+
+    if df_month.empty:
+        st.info("対象月のデータがありません")
+        st.markdown('</div>', unsafe_allow_html=True)
+        return
+
+    df_today = df_all[df_all["日付変換"].dt.date == today_jst()].copy()
+
+    # =========================
+    # 管理者集計内メニュー
+    # =========================
+    admin_menu = st.radio(
+        "表示内容",
+        ["概要", "担当者", "エリア分析", "用件分析", "詳細表"],
+        horizontal=True
+    )
+
+    # =========================
+    # 概要
+    # =========================
+    if admin_menu == "概要":
+        st.markdown('<div class="section-title">概要</div>', unsafe_allow_html=True)
+
+        today_count = len(df_today)
+        today_minutes = int(df_today["対応時間（分）"].sum()) if not df_today.empty else 0
+        month_count = len(df_month)
+        month_minutes = int(df_month["対応時間（分）"].sum())
+
+        oita_count = len(df_month[df_month["受付側"] == "大分"])
+        kumamoto_count = len(df_month[df_month["受付側"] == "熊本"])
+
+        oita_minutes = int(df_month[df_month["受付側"] == "大分"]["対応時間（分）"].sum())
+        kumamoto_minutes = int(df_month[df_month["受付側"] == "熊本"]["対応時間（分）"].sum())
+
+        oita_to_kumamoto = df_month[
+            (df_month["受付側"] == "大分") &
+            (df_month["エリア"] == "熊本")
+        ]
+
+        oita_to_kumamoto_count = len(oita_to_kumamoto)
+        oita_to_kumamoto_minutes = int(oita_to_kumamoto["対応時間（分）"].sum())
+
+        oita_receive_total = len(df_month[df_month["受付側"] == "大分"])
+        oita_kumamoto_rate = (oita_to_kumamoto_count / oita_receive_total * 100) if oita_receive_total > 0 else 0
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        with col1:
+            metric_card("本日 総件数", f"{today_count:,}件", "今日登録された全体件数")
+        with col2:
+            metric_card("本日 総分数", format_minutes(today_minutes), "今日の対応時間合計")
+        with col3:
+            metric_card("今月 総件数", f"{month_count:,}件", "大分＋熊本の合計")
+        with col4:
+            metric_card("今月 総分数", format_minutes(month_minutes), "大分＋熊本の合計")
+
+        st.write("")
+
+        col5, col6, col7, col8 = st.columns(4)
+
+        with col5:
+            metric_card("大分受付 件数", f"{oita_count:,}件", format_minutes(oita_minutes))
+        with col6:
+            metric_card("熊本受付 件数", f"{kumamoto_count:,}件", format_minutes(kumamoto_minutes))
+        with col7:
+            metric_card("大分受付の熊本エリア件数", f"{oita_to_kumamoto_count:,}件", format_minutes(oita_to_kumamoto_minutes))
+        with col8:
+            metric_card("大分受付の熊本エリア比率", f"{oita_kumamoto_rate:.1f}%", "大分受付内の熊本エリア割合")
+
+        st.write("")
+        st.markdown('<div class="section-title">日別推移</div>', unsafe_allow_html=True)
+
+        daily = (
+            df_month
+            .groupby(df_month["日付変換"].dt.strftime("%Y-%m-%d"))
+            .agg(
+                件数=("日付", "count"),
+                分数=("対応時間（分）", "sum")
+            )
+            .reset_index()
+            .rename(columns={"日付変換": "日付"})
+        )
+
+        daily = daily.rename(columns={"日付変換": "日付"})
+        daily["日付"] = daily.iloc[:, 0]
+        daily = daily[["日付", "件数", "分数"]]
+
+        chart_df = daily.set_index("日付")
+
+        col_a, col_b = st.columns(2)
+
+        with col_a:
+            st.subheader("日別 件数")
+            st.line_chart(chart_df["件数"])
+
+        with col_b:
+            st.subheader("日別 分数")
+            st.line_chart(chart_df["分数"])
+
+        with st.expander("日別集計表を見る"):
+            safe_dataframe(daily)
+
+    # =========================
+    # 担当者
+    # =========================
+    elif admin_menu == "担当者":
+        st.markdown('<div class="section-title">担当者別集計</div>', unsafe_allow_html=True)
+
+        staff_summary = (
+            df_month
+            .groupby("担当者")
+            .agg(
+                件数=("日付", "count"),
+                分数=("対応時間（分）", "sum")
+            )
+            .reset_index()
+            .sort_values(["件数", "分数"], ascending=False)
+        )
+
+        staff_summary["平均分数"] = (staff_summary["分数"] / staff_summary["件数"]).round(1)
+
+        col_a, col_b = st.columns(2)
+
+        with col_a:
+            st.subheader("担当者別 件数")
+            st.bar_chart(staff_summary.set_index("担当者")["件数"])
+
+        with col_b:
+            st.subheader("担当者別 分数")
+            st.bar_chart(staff_summary.set_index("担当者")["分数"])
+
+        st.subheader("担当者別一覧")
+        safe_dataframe(staff_summary)
+
+        st.markdown('<div class="section-title">受付側別 × 担当者</div>', unsafe_allow_html=True)
+
+        staff_by_source = (
+            df_month
+            .groupby(["受付側", "担当者"])
+            .agg(
+                件数=("日付", "count"),
+                分数=("対応時間（分）", "sum")
+            )
+            .reset_index()
+            .sort_values(["受付側", "件数"], ascending=[True, False])
+        )
+
+        safe_dataframe(staff_by_source)
+
+    # =========================
+    # エリア分析
+    # =========================
+    elif admin_menu == "エリア分析":
+        st.markdown('<div class="section-title">エリア分析</div>', unsafe_allow_html=True)
+
+        area_cross_count = pd.pivot_table(
+            df_month,
+            index="受付側",
+            columns="エリア",
+            values="日付",
+            aggfunc="count",
+            fill_value=0,
+            margins=True,
+            margins_name="合計"
+        )
+
+        area_cross_minutes = pd.pivot_table(
+            df_month,
+            index="受付側",
+            columns="エリア",
+            values="対応時間（分）",
+            aggfunc="sum",
+            fill_value=0,
+            margins=True,
+            margins_name="合計"
+        )
+
+        oita_to_kumamoto = df_month[
+            (df_month["受付側"] == "大分") &
+            (df_month["エリア"] == "熊本")
+        ]
+
+        oita_to_kumamoto_count = len(oita_to_kumamoto)
+        oita_to_kumamoto_minutes = int(oita_to_kumamoto["対応時間（分）"].sum())
+
+        oita_receive_total = len(df_month[df_month["受付側"] == "大分"])
+        oita_kumamoto_rate = (oita_to_kumamoto_count / oita_receive_total * 100) if oita_receive_total > 0 else 0
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            metric_card("大分が受けた熊本エリア件数", f"{oita_to_kumamoto_count:,}件", "受付側：大分 / エリア：熊本")
+        with col2:
+            metric_card("大分が受けた熊本エリア分数", format_minutes(oita_to_kumamoto_minutes), "受付側：大分 / エリア：熊本")
+        with col3:
+            metric_card("大分受付内の熊本エリア比率", f"{oita_kumamoto_rate:.1f}%", "大分受付のうち熊本エリア分")
+
+        st.subheader("受付側 × 相手エリア：件数")
+        safe_dataframe(area_cross_count.reset_index())
+
+        st.subheader("受付側 × 相手エリア：分数")
+        safe_dataframe(area_cross_minutes.reset_index())
+
+        st.subheader("相手エリア別 件数")
+        area_summary = (
+            df_month
+            .groupby("エリア")
+            .agg(
+                件数=("日付", "count"),
+                分数=("対応時間（分）", "sum")
+            )
+            .reset_index()
+            .sort_values("件数", ascending=False)
+        )
+
+        col_a, col_b = st.columns(2)
+
+        with col_a:
+            st.bar_chart(area_summary.set_index("エリア")["件数"])
+
+        with col_b:
+            st.bar_chart(area_summary.set_index("エリア")["分数"])
+
+        st.subheader("相手エリア別一覧")
+        safe_dataframe(area_summary)
+
+    # =========================
+    # 用件分析
+    # =========================
+    elif admin_menu == "用件分析":
+        st.markdown('<div class="section-title">用件分析</div>', unsafe_allow_html=True)
+
+        category_summary = (
+            df_month
+            .groupby("用件")
+            .agg(
+                件数=("日付", "count"),
+                分数=("対応時間（分）", "sum")
+            )
+            .reset_index()
+            .sort_values("件数", ascending=False)
+        )
+
+        category_summary["平均分数"] = (category_summary["分数"] / category_summary["件数"]).round(1)
+
+        col_a, col_b = st.columns(2)
+
+        with col_a:
+            st.subheader("用件別 件数")
+            st.bar_chart(category_summary.set_index("用件")["件数"])
+
+        with col_b:
+            st.subheader("用件別 分数")
+            st.bar_chart(category_summary.set_index("用件")["分数"])
+
+        st.subheader("用件別一覧")
+        safe_dataframe(category_summary)
+
+        st.markdown('<div class="section-title">受付側 × 用件</div>', unsafe_allow_html=True)
+
+        source_category = pd.pivot_table(
+            df_month,
+            index="用件",
+            columns="受付側",
+            values="日付",
+            aggfunc="count",
+            fill_value=0,
+            margins=True,
+            margins_name="合計"
+        )
+
+        safe_dataframe(source_category.reset_index())
+
+    # =========================
+    # 詳細表
+    # =========================
+    elif admin_menu == "詳細表":
+        st.markdown('<div class="section-title">詳細表</div>', unsafe_allow_html=True)
+
+        with st.expander("今月分の結合データを見る", expanded=True):
+            show_cols = [
+                "日付",
+                "受付側",
+                "担当者",
+                "エリア",
+                "相手",
+                "対応時間（分）",
+                "用件",
+                "備考",
+                "登録日時"
+            ]
+            safe_dataframe(
+                df_month[show_cols].sort_values(["日付", "登録日時"], ascending=[False, False]),
+                height=420
+            )
+
+        with st.expander("当日サマリー シートを表示"):
+            df_today_summary = load_optional_sheet("当日サマリー")
+            safe_dataframe(df_today_summary, height=320)
+
+        with st.expander("月次サマリー シートを表示"):
+            df_month_summary = load_optional_sheet("月次サマリー")
+            safe_dataframe(df_month_summary, height=420)
+
+        with st.expander("集計元 シートを表示"):
+            df_base = load_optional_sheet("集計元")
+            safe_dataframe(df_base, height=420)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# =========================
+# ワークシート取得
+# =========================
 ws = get_worksheet()
 
 # =========================
@@ -642,6 +1114,8 @@ if "last_date" not in st.session_state:
 if st.session_state.last_date != today:
     st.session_state.last_date = today
     load_data.clear()
+    load_log_sheet_for_admin.clear()
+    load_optional_sheet.clear()
     st.rerun()
 
 # =========================
@@ -664,6 +1138,24 @@ if st.session_state.staff == "":
 
 staff = st.session_state.staff
 st.markdown(f'<div class="staff-badge">担当者：{staff}</div>', unsafe_allow_html=True)
+
+# =========================
+# メイン画面切替
+# =========================
+main_view = st.radio(
+    "画面切替",
+    ["電話ログ入力", "管理者集計"],
+    horizontal=True,
+    key="main_view"
+)
+
+if main_view == "管理者集計":
+    render_admin_dashboard()
+    st.stop()
+
+# =========================
+# ここから電話ログ入力画面
+# =========================
 
 # =========================
 # データ取得
@@ -757,6 +1249,9 @@ if st.button("＋ 追加する", type="primary", use_container_width=True):
     ws.append_rows(rows_to_add, value_input_option="USER_ENTERED")
 
     load_data.clear()
+    load_log_sheet_for_admin.clear()
+    load_optional_sheet.clear()
+
     st.session_state["added"] = True
     st.session_state["added_count"] = int(count)
     st.session_state["reset_form"] = True
@@ -809,7 +1304,11 @@ if not df_view.empty:
             with col2:
                 if st.button("削除", key=f"del_{i}"):
                     ws.delete_rows(int(row["index"]) + 2)
+
                     load_data.clear()
+                    load_log_sheet_for_admin.clear()
+                    load_optional_sheet.clear()
+
                     st.rerun()
 
     total = int(df_view["対応時間（分）"].sum())
