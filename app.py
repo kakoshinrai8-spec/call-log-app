@@ -772,12 +772,29 @@ def render_admin_dashboard():
         unsafe_allow_html=True
     )
 
-    target_month_date = st.date_input(
-        "表示対象月",
-        value=today_jst(),
-        help="選択した日付の月を対象に集計します。"
-    )
+    today_for_month = today_jst()
 
+    year_options = list(range(today_for_month.year - 2, today_for_month.year + 1))
+    month_options = list(range(1, 13))
+
+    col_y, col_m = st.columns(2)
+
+    with col_y:
+        selected_year = st.selectbox(
+            "表示対象年",
+            year_options,
+            index=year_options.index(today_for_month.year)
+        )
+
+    with col_m:
+        selected_month = st.selectbox(
+            "表示対象月",
+            month_options,
+            index=today_for_month.month - 1,
+            format_func=lambda x: f"{x}月"
+        )
+
+    target_month_date = date(selected_year, selected_month, 1)
     month_start, month_end = month_start_end(target_month_date)
 
     st.caption(
