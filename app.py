@@ -43,9 +43,6 @@ st.markdown("""
     max-width: 1180px;
 }
 
-/* =========================
-   ヘッダー
-   ========================= */
 .app-header {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 48%, #334155 100%) !important;
     color: #ffffff !important;
@@ -162,9 +159,6 @@ st.markdown("""
     font-weight: 700;
 }
 
-/* =========================
-   ダークモード文字消え対策
-   ========================= */
 html,
 body,
 .stApp,
@@ -176,7 +170,6 @@ div[data-testid="stWidgetLabel"] * {
     color: #0f172a !important;
 }
 
-/* ラベル */
 label,
 div[data-testid="stSelectbox"] label,
 div[data-testid="stNumberInput"] label,
@@ -190,9 +183,6 @@ div[data-testid="stTextArea"] label {
     opacity: 1 !important;
 }
 
-/* =========================
-   入力欄・プルダウン・日付欄
-   ========================= */
 div[data-baseweb="select"] > div,
 div[data-baseweb="input"] > div,
 div[data-baseweb="textarea"] > div {
@@ -210,7 +200,6 @@ div[data-baseweb="textarea"] > div:hover {
     border-color: #2563eb !important;
 }
 
-/* 入力欄の中の文字 */
 input,
 textarea,
 div[data-baseweb="select"] input,
@@ -225,7 +214,6 @@ div[data-baseweb="textarea"] textarea {
     box-shadow: none !important;
 }
 
-/* placeholder */
 input::placeholder,
 textarea::placeholder {
     color: #64748b !important;
@@ -233,7 +221,6 @@ textarea::placeholder {
     -webkit-text-fill-color: #64748b !important;
 }
 
-/* 入力フォームの黒枠・フォーカス枠対策 */
 input,
 textarea,
 div[data-baseweb="select"] > div,
@@ -254,7 +241,6 @@ div[data-baseweb="textarea"] > div:focus-within {
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18) !important;
 }
 
-/* selectbox の表示文字・矢印・中身 */
 div[data-baseweb="select"],
 div[data-baseweb="select"] *,
 div[data-baseweb="popover"],
@@ -271,7 +257,6 @@ li[role="option"] * {
     opacity: 1 !important;
 }
 
-/* selectbox候補 hover */
 li[role="option"]:hover,
 div[data-baseweb="menu"] li:hover {
     background-color: #eaf1ff !important;
@@ -279,9 +264,6 @@ div[data-baseweb="menu"] li:hover {
     -webkit-text-fill-color: #0f172a !important;
 }
 
-/* =========================
-   radio
-   ========================= */
 div[data-testid="stRadio"] > div {
     gap: 12px;
 }
@@ -306,9 +288,6 @@ div[data-baseweb="radio"] * {
     opacity: 1 !important;
 }
 
-/* =========================
-   number_input の + / - ボタン補正
-   ========================= */
 div[data-testid="stNumberInput"] {
     color: #0f172a !important;
 }
@@ -364,7 +343,6 @@ div[data-testid="stNumberInput"] button:disabled {
     border: 1px solid #cbd5e1 !important;
 }
 
-/* date input / calendar */
 div[data-testid="stDateInput"] div[data-baseweb="input"] > div {
     border-color: #cbd5e1 !important;
     outline: none !important;
@@ -386,7 +364,6 @@ div[data-baseweb="datepicker"] * {
     -webkit-text-fill-color: #0f172a !important;
 }
 
-/* disabledでも文字が消えないように */
 [disabled],
 [aria-disabled="true"] {
     color: #475569 !important;
@@ -394,9 +371,6 @@ div[data-baseweb="datepicker"] * {
     -webkit-text-fill-color: #475569 !important;
 }
 
-/* =========================
-   メインボタン：決定・追加する
-   ========================= */
 .stButton > button[kind="primary"] {
     border-radius: 14px;
     font-weight: 900;
@@ -428,7 +402,6 @@ div[data-baseweb="datepicker"] * {
     transform: translateY(0px);
 }
 
-/* 削除ボタン */
 .stButton > button[kind="secondary"] {
     border-radius: 12px;
     font-weight: 800;
@@ -454,9 +427,6 @@ div[data-baseweb="datepicker"] * {
     border: none !important;
 }
 
-/* =========================
-   履歴カード
-   ========================= */
 .log-row {
     background: #ffffff !important;
     border: 1px solid #dbe3ef;
@@ -482,9 +452,6 @@ div[data-baseweb="datepicker"] * {
     line-height: 1.5;
 }
 
-/* =========================
-   合計
-   ========================= */
 .total-box {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
     color: #ffffff !important;
@@ -518,7 +485,6 @@ hr {
     margin-bottom: 1.2rem;
 }
 
-/* alert/info/success系 */
 .stAlert,
 .stAlert *,
 div[data-testid="stAlert"],
@@ -527,7 +493,6 @@ div[data-testid="stAlert"] * {
     opacity: 1 !important;
 }
 
-/* StreamlitのClear caches等の管理ポップアップ補正 */
 div[role="dialog"],
 div[role="dialog"] * {
     color: #f8fafc !important;
@@ -649,11 +614,9 @@ def normalize_log_df(df, source_name):
     if df.empty:
         df = pd.DataFrame(columns=HEADER_COLUMNS)
 
-    # 旧ヘッダー「要件」でも読み込めるようにする
     if "用件" not in df.columns and "要件" in df.columns:
         df["用件"] = df["要件"]
 
-    # 「要件」と「用件」が両方ある場合は、用件が空なら要件から補完
     if "用件" in df.columns and "要件" in df.columns:
         df["用件"] = df["用件"].replace("", pd.NA).fillna(df["要件"])
 
@@ -885,18 +848,12 @@ def render_admin_dashboard():
 
     df_today = df_all[df_all["日付変換"].dt.date == today_jst()].copy()
 
-    # =========================
-    # 管理者集計内メニュー
-    # =========================
     admin_menu = st.radio(
         "表示内容",
         ["概要", "担当者", "エリア分析", "相手別分析", "用件分析", "月次サマリー", "詳細表"],
         horizontal=True
     )
 
-    # =========================
-    # 概要
-    # =========================
     if admin_menu == "概要":
         st.markdown('<div class="section-title">概要</div>', unsafe_allow_html=True)
 
@@ -979,9 +936,6 @@ def render_admin_dashboard():
         with st.expander("日別集計表を見る"):
             safe_dataframe(daily)
 
-    # =========================
-    # 担当者
-    # =========================
     elif admin_menu == "担当者":
         st.markdown('<div class="section-title">担当者別集計</div>', unsafe_allow_html=True)
 
@@ -1026,9 +980,6 @@ def render_admin_dashboard():
 
         safe_dataframe(staff_by_source)
 
-    # =========================
-    # エリア分析
-    # =========================
     elif admin_menu == "エリア分析":
         st.markdown('<div class="section-title">エリア分析</div>', unsafe_allow_html=True)
 
@@ -1105,9 +1056,6 @@ def render_admin_dashboard():
         st.subheader("相手エリア別一覧")
         safe_dataframe(area_summary)
 
-    # =========================
-    # 相手別分析
-    # =========================
     elif admin_menu == "相手別分析":
         st.markdown('<div class="section-title">相手別分析</div>', unsafe_allow_html=True)
 
@@ -1123,6 +1071,37 @@ def render_admin_dashboard():
         )
 
         partner_summary["平均分数"] = (partner_summary["分数"] / partner_summary["件数"]).round(1)
+
+        st.markdown('<div class="section-title">相手別ランキング</div>', unsafe_allow_html=True)
+
+        count_ranking = (
+            partner_summary
+            .sort_values(["件数", "分数"], ascending=False)
+            .head(10)
+            .reset_index(drop=True)
+        )
+        count_ranking.insert(0, "順位", count_ranking.index + 1)
+
+        minutes_ranking = (
+            partner_summary
+            .sort_values(["分数", "件数"], ascending=False)
+            .head(10)
+            .reset_index(drop=True)
+        )
+        minutes_ranking.insert(0, "順位", minutes_ranking.index + 1)
+
+        col_rank1, col_rank2 = st.columns(2)
+
+        with col_rank1:
+            st.subheader("件数ランキング TOP10")
+            safe_dataframe(count_ranking[["順位", "相手", "件数", "分数", "平均分数"]])
+
+        with col_rank2:
+            st.subheader("分数ランキング TOP10")
+            safe_dataframe(minutes_ranking[["順位", "相手", "分数", "件数", "平均分数"]])
+
+        st.write("")
+        st.markdown('<div class="section-title">相手別グラフ</div>', unsafe_allow_html=True)
 
         col_a, col_b = st.columns(2)
 
@@ -1183,9 +1162,6 @@ def render_admin_dashboard():
         st.subheader("相手 × 用件：件数")
         safe_dataframe(partner_category.reset_index())
 
-    # =========================
-    # 用件分析
-    # =========================
     elif admin_menu == "用件分析":
         st.markdown('<div class="section-title">用件分析</div>', unsafe_allow_html=True)
 
@@ -1230,9 +1206,6 @@ def render_admin_dashboard():
 
         safe_dataframe(source_category.reset_index())
 
-    # =========================
-    # 月次サマリー
-    # =========================
     elif admin_menu == "月次サマリー":
         st.markdown('<div class="section-title">月次サマリー</div>', unsafe_allow_html=True)
 
@@ -1241,9 +1214,6 @@ def render_admin_dashboard():
         df_month_summary = load_optional_sheet("月次サマリー")
         safe_dataframe(df_month_summary, height=620)
 
-    # =========================
-    # 詳細表
-    # =========================
     elif admin_menu == "詳細表":
         st.markdown('<div class="section-title">詳細表</div>', unsafe_allow_html=True)
 
