@@ -480,6 +480,18 @@ div[data-baseweb="datepicker"] * {
     margin-top: 5px;
 }
 
+.total-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+@media (max-width: 700px) {
+    .total-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 hr {
     margin-top: 1.2rem;
     margin-bottom: 1.2rem;
@@ -1461,15 +1473,24 @@ if not df_view.empty:
 
                     st.rerun()
 
-    total = int(df_view["対応時間（分）"].sum())
-    h = total // 60
-    m = total % 60
+    total_minutes = int(df_view["対応時間（分）"].sum())
+    total_count = int(len(df_view))
+    h = total_minutes // 60
+    m = total_minutes % 60
 
     st.markdown(
         f"""
         <div class="total-box">
-            <div class="total-label">表示日の合計対応時間</div>
-            <div class="total-value">{total}分（{h}時間{m}分）</div>
+            <div class="total-grid">
+                <div>
+                    <div class="total-label">表示日の合計件数</div>
+                    <div class="total-value">{total_count}件</div>
+                </div>
+                <div>
+                    <div class="total-label">表示日の合計対応時間</div>
+                    <div class="total-value">{total_minutes}分（{h}時間{m}分）</div>
+                </div>
+            </div>
         </div>
         """,
         unsafe_allow_html=True
