@@ -728,6 +728,27 @@ def format_minutes(total_minutes):
     m = total_minutes % 60
     return f"{total_minutes:,}分（{h}時間{m}分）"
 
+def build_daily_summary(df_month, month_start, month_end):
+    if df_month is None or df_month.empty:
+        return pd.DataFrame(columns=["日付", "件数", "分数"])
+
+    daily = (
+        df_month
+        .groupby(df_month["日付変換"].dt.date)
+        .agg(
+            件数=("日付変換", "size"),
+            分数=("対応時間（分）", "sum")
+        )
+    )
+
+    all_dates = pd.date_range(month_start, month_end, freq="D").date
+    daily = daily.reindex(all_dates, fill_value=0)
+    daily.index.name = "日付"
+    daily = daily.reset_index()
+    daily["日付"] = pd.to_datetime(daily["日付"]).dt.strftime("%Y-%m-%d")
+
+    return daily[["日付", "件数", "分数"]]
+
 def horizontal_bar_chart(df, label_col, value_col, title="", top_n=20):
     if df is None or df.empty:
         st.info("表示できるデータがありません")
@@ -918,21 +939,7 @@ def render_admin_dashboard():
         st.write("")
         st.markdown('<div class="section-title">日別推移</div>', unsafe_allow_html=True)
 
-        daily = (
-            df_month
-            .groupby(df_month["日付変換"].dt.strftime("%Y-%m-%d"))
-            .agg(
-                件数=("日付", "count"),
-                分数=("対応時間（分）", "sum")
-            )
-            .reset_index()
-        )
-
-        daily = daily.rename(columns={"日付変換": "日付"})
-        if "日付" not in daily.columns:
-            daily = daily.rename(columns={daily.columns[0]: "日付"})
-
-        daily = daily[["日付", "件数", "分数"]]
+        daily = build_daily_summary(df_month, month_start, month_end)
         chart_df = daily.set_index("日付")
 
         col_a, col_b = st.columns(2)
