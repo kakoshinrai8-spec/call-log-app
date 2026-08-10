@@ -25,7 +25,8 @@ def now_jst_str():
 st.markdown("""
 <style>
 .stApp {
-    background: #eef2f7;
+    background: #eef2f7 !important;
+    color: #0f172a !important;
 }
 
 .block-container {
@@ -35,12 +36,20 @@ st.markdown("""
 }
 
 .app-header {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 48%, #334155 100%);
-    color: white;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 48%, #334155 100%) !important;
+    color: #ffffff !important;
     padding: 26px 30px;
     border-radius: 22px;
     margin-bottom: 22px;
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
+}
+
+.app-header,
+.app-header *,
+.app-title,
+.app-subtitle {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 .app-title {
@@ -57,8 +66,9 @@ st.markdown("""
 
 .staff-badge {
     display: inline-block;
-    background: #e0e7ff;
-    color: #312e81;
+    background: #e0e7ff !important;
+    color: #312e81 !important;
+    -webkit-text-fill-color: #312e81 !important;
     padding: 9px 16px;
     border-radius: 999px;
     font-weight: 800;
@@ -66,8 +76,15 @@ st.markdown("""
     border: 1px solid #a5b4fc;
 }
 
+/* Streamlitでは別々のmarkdown呼び出しでHTML divをラップできないため、
+   空のsection-cardが白い横棒として出る場合は表示しない */
+.section-card:empty {
+    display: none !important;
+}
+
 .section-card {
-    background: #ffffff;
+    background: #ffffff !important;
+    color: #0f172a !important;
     padding: 22px 24px;
     border-radius: 20px;
     box-shadow: 0 8px 22px rgba(15, 23, 42, 0.10);
@@ -78,7 +95,8 @@ st.markdown("""
 .section-title {
     font-size: 20px;
     font-weight: 850;
-    color: #0f172a;
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
     margin-bottom: 14px;
     border-left: 6px solid #2563eb;
     padding-left: 10px;
@@ -86,63 +104,211 @@ st.markdown("""
 
 .help-text {
     font-size: 13px;
-    color: #64748b;
+    color: #64748b !important;
+    -webkit-text-fill-color: #64748b !important;
     margin-top: -6px;
     margin-bottom: 14px;
 }
 
-/* 入力欄・プルダウン・日付欄 */
+/* ラベルを常に濃く表示 */
+label,
+div[data-testid="stWidgetLabel"],
+div[data-testid="stWidgetLabel"] *,
+div[data-testid="stSelectbox"] label,
+div[data-testid="stNumberInput"] label,
+div[data-testid="stTextInput"] label,
+div[data-testid="stDateInput"] label,
+div[data-testid="stRadio"] label,
+div[data-testid="stTextArea"] label {
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+}
+
+/* select / text / date / number の入力面 */
 div[data-baseweb="select"] > div,
 div[data-baseweb="input"] > div,
 div[data-baseweb="textarea"] > div {
-    background-color: #f8fafc !important;
-    border: 1.5px solid #cbd5e1 !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid #94a3b8 !important;
     border-radius: 12px !important;
+    color: #0f172a !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06) !important;
+    outline: none !important;
 }
 
 div[data-baseweb="select"] > div:hover,
 div[data-baseweb="input"] > div:hover,
 div[data-baseweb="textarea"] > div:hover {
-    border-color: #2563eb !important;
+    border-color: #64748b !important;
 }
 
+div[data-baseweb="select"] > div:focus-within,
+div[data-baseweb="input"] > div:focus-within,
+div[data-baseweb="textarea"] > div:focus-within {
+    border-color: #2563eb !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18) !important;
+}
+
+/* 入力文字・プレースホルダー */
+input,
+textarea,
 div[data-baseweb="select"] input,
 div[data-baseweb="input"] input,
-textarea {
+div[data-baseweb="textarea"] textarea {
     color: #0f172a !important;
+    background-color: #ffffff !important;
     font-weight: 650 !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
-/* ラベル */
-div[data-testid="stSelectbox"] label,
-div[data-testid="stNumberInput"] label,
-div[data-testid="stTextInput"] label,
-div[data-testid="stDateInput"] label {
-    font-weight: 800;
-    color: #0f172a;
+input::placeholder,
+textarea::placeholder {
+    color: #64748b !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #64748b !important;
 }
 
-/* メインボタン：決定・追加する */
+/* プルダウン展開時 */
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] *,
+div[data-baseweb="menu"],
+div[data-baseweb="menu"] *,
+ul[role="listbox"],
+ul[role="listbox"] *,
+li[role="option"],
+li[role="option"] * {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+}
+
+div[data-baseweb="popover"],
+div[data-baseweb="menu"],
+ul[role="listbox"],
+li[role="option"] {
+    background-color: #ffffff !important;
+}
+
+li[role="option"]:hover,
+div[data-baseweb="menu"] li:hover {
+    background-color: #eaf1ff !important;
+}
+
+/* NumberInputの +/- まで視認できるようにする */
+div[data-testid="stNumberInput"] input {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #0f172a !important;
+}
+
+div[data-testid="stNumberInput"] div[data-baseweb="input"] > div {
+    background-color: #ffffff !important;
+    border: 1.5px solid #94a3b8 !important;
+    border-radius: 12px !important;
+}
+
+div[data-testid="stNumberInput"] div[data-baseweb="input"] > div:focus-within {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18) !important;
+}
+
+div[data-testid="stNumberInput"] button {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    border-left: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+}
+
+div[data-testid="stNumberInput"] button svg,
+div[data-testid="stNumberInput"] button svg path {
+    color: #0f172a !important;
+    fill: #0f172a !important;
+    stroke: #0f172a !important;
+}
+
+div[data-testid="stNumberInput"] button:hover {
+    background-color: #cbd5e1 !important;
+}
+
+/* 日付入力・カレンダー */
+div[data-testid="stDateInput"] div[data-baseweb="input"] > div {
+    background-color: #ffffff !important;
+    border: 1.5px solid #94a3b8 !important;
+}
+
+div[data-testid="stDateInput"] div[data-baseweb="input"] > div:focus-within {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18) !important;
+}
+
+div[data-baseweb="calendar"],
+div[data-baseweb="calendar"] *,
+div[data-baseweb="datepicker"],
+div[data-baseweb="datepicker"] * {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+}
+
+/* ラジオボタン */
+div[data-testid="stRadio"] > div {
+    gap: 12px;
+}
+
+div[data-testid="stRadio"] label {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px 12px !important;
+    border-radius: 999px !important;
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+}
+
+div[data-testid="stRadio"] *,
+div[role="radiogroup"],
+div[role="radiogroup"] *,
+div[data-baseweb="radio"],
+div[data-baseweb="radio"] * {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+}
+
+/* メインボタン */
 .stButton > button[kind="primary"] {
     border-radius: 14px;
     font-weight: 900;
     min-height: 44px;
     border: none !important;
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
-    color: white !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
+}
+
+.stButton > button[kind="primary"] *,
+.stButton > button[kind="primary"] p,
+.stButton > button[kind="primary"] span {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 .stButton > button[kind="primary"]:hover {
     background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
-    color: white !important;
+    color: #ffffff !important;
     border: none !important;
     transform: translateY(-1px);
     box-shadow: 0 10px 22px rgba(37, 99, 235, 0.34);
 }
 
 .stButton > button[kind="primary"]:active {
-    transform: translateY(0px);
+    transform: translateY(0);
 }
 
 /* 削除ボタン */
@@ -152,26 +318,22 @@ div[data-testid="stDateInput"] label {
     min-height: 40px;
     border: none !important;
     background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
-    color: white !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     box-shadow: 0 6px 14px rgba(220, 38, 38, 0.25);
+}
+
+.stButton > button[kind="secondary"] *,
+.stButton > button[kind="secondary"] p,
+.stButton > button[kind="secondary"] span {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 .stButton > button[kind="secondary"]:hover {
     background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%) !important;
-    color: white !important;
+    color: #ffffff !important;
     border: none !important;
-}
-
-/* ラジオボタン */
-div[data-testid="stRadio"] > div {
-    gap: 12px;
-}
-
-div[data-testid="stRadio"] label {
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    padding: 8px 12px;
-    border-radius: 999px;
 }
 
 /* 履歴カード */
@@ -206,6 +368,12 @@ div[data-testid="stRadio"] label {
     padding: 20px 24px;
     margin-top: 16px;
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+}
+
+.total-box,
+.total-box * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 .total-label {
