@@ -128,7 +128,7 @@ div[data-baseweb="select"] > div,
 div[data-baseweb="input"] > div,
 div[data-baseweb="textarea"] > div {
     background-color: #f8fbff !important;
-    border: 2px solid #64748b !important;
+    border: 2.5px solid #475569 !important;
     border-radius: 12px !important;
     color: #0f172a !important;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10) !important;
@@ -140,7 +140,7 @@ div[data-testid="stTextInput"] div[data-baseweb="input"],
 div[data-testid="stDateInput"] div[data-baseweb="input"],
 div[data-testid="stNumberInput"] div[data-baseweb="input"] {
     background-color: #f8fbff !important;
-    border: 2px solid #64748b !important;
+    border: 2.5px solid #475569 !important;
     border-radius: 12px !important;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10) !important;
     overflow: hidden !important;
@@ -153,7 +153,7 @@ div[data-testid="stSelectbox"] div[data-baseweb="select"]:hover,
 div[data-testid="stTextInput"] div[data-baseweb="input"]:hover,
 div[data-testid="stDateInput"] div[data-baseweb="input"]:hover,
 div[data-testid="stNumberInput"] div[data-baseweb="input"]:hover {
-    border-color: #334155 !important;
+    border-color: #1e293b !important;
 }
 
 div[data-baseweb="select"] > div:focus-within,
