@@ -123,49 +123,46 @@ div[data-testid="stTextArea"] label {
     opacity: 1 !important;
 }
 
-/* 入力欄そのものとBaseWeb外枠の両方へ枠を指定する */
-div[data-baseweb="select"] > div,
-div[data-baseweb="input"] > div,
-div[data-baseweb="textarea"] > div {
-    background-color: #f8fbff !important;
-    border: 2.5px solid #475569 !important;
-    border-radius: 12px !important;
-    color: #0f172a !important;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10) !important;
-    outline: none !important;
-}
-
+/* 業務画面として入力欄を明確な箱にする。外側コンテナへ直接太線を付ける。 */
 div[data-testid="stSelectbox"] div[data-baseweb="select"],
 div[data-testid="stTextInput"] div[data-baseweb="input"],
 div[data-testid="stDateInput"] div[data-baseweb="input"],
-div[data-testid="stNumberInput"] div[data-baseweb="input"] {
-    background-color: #f8fbff !important;
-    border: 2.5px solid #475569 !important;
+div[data-testid="stNumberInput"] div[data-baseweb="input"],
+div[data-testid="stTextArea"] div[data-baseweb="textarea"] {
+    background-color: #ffffff !important;
+    border: 3px solid #334155 !important;
     border-radius: 12px !important;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10) !important;
     overflow: hidden !important;
 }
 
-div[data-baseweb="select"] > div:hover,
-div[data-baseweb="input"] > div:hover,
-div[data-baseweb="textarea"] > div:hover,
+/* 内側要素には重複枠を付けず、外枠を常に見せる */
+div[data-baseweb="select"] > div,
+div[data-baseweb="input"] > div,
+div[data-baseweb="textarea"] > div {
+    background-color: #ffffff !important;
+    border: 0 !important;
+    border-radius: 9px !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
 div[data-testid="stSelectbox"] div[data-baseweb="select"]:hover,
 div[data-testid="stTextInput"] div[data-baseweb="input"]:hover,
 div[data-testid="stDateInput"] div[data-baseweb="input"]:hover,
-div[data-testid="stNumberInput"] div[data-baseweb="input"]:hover {
-    border-color: #1e293b !important;
+div[data-testid="stNumberInput"] div[data-baseweb="input"]:hover,
+div[data-testid="stTextArea"] div[data-baseweb="textarea"]:hover {
+    border-color: #0f172a !important;
 }
 
-div[data-baseweb="select"] > div:focus-within,
-div[data-baseweb="input"] > div:focus-within,
-div[data-baseweb="textarea"] > div:focus-within,
 div[data-testid="stSelectbox"] div[data-baseweb="select"]:focus-within,
 div[data-testid="stTextInput"] div[data-baseweb="input"]:focus-within,
 div[data-testid="stDateInput"] div[data-baseweb="input"]:focus-within,
-div[data-testid="stNumberInput"] div[data-baseweb="input"]:focus-within {
+div[data-testid="stNumberInput"] div[data-baseweb="input"]:focus-within,
+div[data-testid="stTextArea"] div[data-baseweb="textarea"]:focus-within {
     border-color: #2563eb !important;
-    outline: none !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.20) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.22) !important;
 }
 
 input,
@@ -174,7 +171,7 @@ div[data-baseweb="select"] input,
 div[data-baseweb="input"] input,
 div[data-baseweb="textarea"] textarea {
     color: #0f172a !important;
-    background-color: #f8fbff !important;
+    background-color: #ffffff !important;
     font-weight: 650 !important;
     -webkit-text-fill-color: #0f172a !important;
     opacity: 1 !important;
@@ -216,21 +213,21 @@ div[data-baseweb="menu"] li:hover {
 
 div[data-testid="stNumberInput"] input {
     color: #0f172a !important;
-    background-color: #f8fbff !important;
+    background-color: #ffffff !important;
     -webkit-text-fill-color: #0f172a !important;
 }
 
 div[data-testid="stNumberInput"] div[data-baseweb="input"] > div {
-    background-color: #f8fbff !important;
+    background-color: #ffffff !important;
     border: 0 !important;
-    border-radius: 10px !important;
+    border-radius: 9px !important;
 }
 
 div[data-testid="stNumberInput"] button {
-    background-color: #dbe4ee !important;
+    background-color: #e2e8f0 !important;
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
-    border-left: 1px solid #94a3b8 !important;
+    border-left: 2px solid #334155 !important;
     box-shadow: none !important;
 }
 
@@ -246,7 +243,7 @@ div[data-testid="stNumberInput"] button:hover {
 }
 
 div[data-testid="stDateInput"] div[data-baseweb="input"] > div {
-    background-color: #f8fbff !important;
+    background-color: #ffffff !important;
     border: 0 !important;
 }
 
