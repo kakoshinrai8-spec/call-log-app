@@ -25,7 +25,7 @@ def now_jst_str():
 st.markdown("""
 <style>
 .stApp {
-    background: #eef2f7 !important;
+    background: #e8eef5 !important;
     color: #0f172a !important;
 }
 
@@ -76,8 +76,6 @@ st.markdown("""
     border: 1px solid #a5b4fc;
 }
 
-/* Streamlitでは別々のmarkdown呼び出しでHTML divをラップできないため、
-   空のsection-cardが白い横棒として出る場合は表示しない */
 .section-card:empty {
     display: none !important;
 }
@@ -110,7 +108,6 @@ st.markdown("""
     margin-bottom: 14px;
 }
 
-/* ラベルを常に濃く表示 */
 label,
 div[data-testid="stWidgetLabel"],
 div[data-testid="stWidgetLabel"] *,
@@ -126,40 +123,58 @@ div[data-testid="stTextArea"] label {
     opacity: 1 !important;
 }
 
-/* select / text / date / number の入力面 */
+/* 入力欄そのものとBaseWeb外枠の両方へ枠を指定する */
 div[data-baseweb="select"] > div,
 div[data-baseweb="input"] > div,
 div[data-baseweb="textarea"] > div {
-    background-color: #ffffff !important;
-    border: 1.5px solid #94a3b8 !important;
+    background-color: #f8fbff !important;
+    border: 2px solid #64748b !important;
     border-radius: 12px !important;
     color: #0f172a !important;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06) !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10) !important;
     outline: none !important;
+}
+
+div[data-testid="stSelectbox"] div[data-baseweb="select"],
+div[data-testid="stTextInput"] div[data-baseweb="input"],
+div[data-testid="stDateInput"] div[data-baseweb="input"],
+div[data-testid="stNumberInput"] div[data-baseweb="input"] {
+    background-color: #f8fbff !important;
+    border: 2px solid #64748b !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10) !important;
+    overflow: hidden !important;
 }
 
 div[data-baseweb="select"] > div:hover,
 div[data-baseweb="input"] > div:hover,
-div[data-baseweb="textarea"] > div:hover {
-    border-color: #64748b !important;
+div[data-baseweb="textarea"] > div:hover,
+div[data-testid="stSelectbox"] div[data-baseweb="select"]:hover,
+div[data-testid="stTextInput"] div[data-baseweb="input"]:hover,
+div[data-testid="stDateInput"] div[data-baseweb="input"]:hover,
+div[data-testid="stNumberInput"] div[data-baseweb="input"]:hover {
+    border-color: #334155 !important;
 }
 
 div[data-baseweb="select"] > div:focus-within,
 div[data-baseweb="input"] > div:focus-within,
-div[data-baseweb="textarea"] > div:focus-within {
+div[data-baseweb="textarea"] > div:focus-within,
+div[data-testid="stSelectbox"] div[data-baseweb="select"]:focus-within,
+div[data-testid="stTextInput"] div[data-baseweb="input"]:focus-within,
+div[data-testid="stDateInput"] div[data-baseweb="input"]:focus-within,
+div[data-testid="stNumberInput"] div[data-baseweb="input"]:focus-within {
     border-color: #2563eb !important;
     outline: none !important;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.20) !important;
 }
 
-/* 入力文字・プレースホルダー */
 input,
 textarea,
 div[data-baseweb="select"] input,
 div[data-baseweb="input"] input,
 div[data-baseweb="textarea"] textarea {
     color: #0f172a !important;
-    background-color: #ffffff !important;
+    background-color: #f8fbff !important;
     font-weight: 650 !important;
     -webkit-text-fill-color: #0f172a !important;
     opacity: 1 !important;
@@ -174,7 +189,6 @@ textarea::placeholder {
     -webkit-text-fill-color: #64748b !important;
 }
 
-/* プルダウン展開時 */
 div[data-baseweb="popover"],
 div[data-baseweb="popover"] *,
 div[data-baseweb="menu"],
@@ -200,29 +214,23 @@ div[data-baseweb="menu"] li:hover {
     background-color: #eaf1ff !important;
 }
 
-/* NumberInputの +/- まで視認できるようにする */
 div[data-testid="stNumberInput"] input {
     color: #0f172a !important;
-    background-color: #ffffff !important;
+    background-color: #f8fbff !important;
     -webkit-text-fill-color: #0f172a !important;
 }
 
 div[data-testid="stNumberInput"] div[data-baseweb="input"] > div {
-    background-color: #ffffff !important;
-    border: 1.5px solid #94a3b8 !important;
-    border-radius: 12px !important;
-}
-
-div[data-testid="stNumberInput"] div[data-baseweb="input"] > div:focus-within {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18) !important;
+    background-color: #f8fbff !important;
+    border: 0 !important;
+    border-radius: 10px !important;
 }
 
 div[data-testid="stNumberInput"] button {
-    background-color: #e2e8f0 !important;
+    background-color: #dbe4ee !important;
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
-    border-left: 1px solid #cbd5e1 !important;
+    border-left: 1px solid #94a3b8 !important;
     box-shadow: none !important;
 }
 
@@ -237,15 +245,9 @@ div[data-testid="stNumberInput"] button:hover {
     background-color: #cbd5e1 !important;
 }
 
-/* 日付入力・カレンダー */
 div[data-testid="stDateInput"] div[data-baseweb="input"] > div {
-    background-color: #ffffff !important;
-    border: 1.5px solid #94a3b8 !important;
-}
-
-div[data-testid="stDateInput"] div[data-baseweb="input"] > div:focus-within {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18) !important;
+    background-color: #f8fbff !important;
+    border: 0 !important;
 }
 
 div[data-baseweb="calendar"],
@@ -256,7 +258,6 @@ div[data-baseweb="datepicker"] * {
     -webkit-text-fill-color: #0f172a !important;
 }
 
-/* ラジオボタン */
 div[data-testid="stRadio"] > div {
     gap: 12px;
 }
@@ -280,7 +281,6 @@ div[data-baseweb="radio"] * {
     opacity: 1 !important;
 }
 
-/* メインボタン */
 .stButton > button[kind="primary"] {
     border-radius: 14px;
     font-weight: 900;
@@ -311,7 +311,6 @@ div[data-baseweb="radio"] * {
     transform: translateY(0);
 }
 
-/* 削除ボタン */
 .stButton > button[kind="secondary"] {
     border-radius: 12px;
     font-weight: 800;
@@ -336,7 +335,6 @@ div[data-baseweb="radio"] * {
     border: none !important;
 }
 
-/* 履歴カード */
 .log-row {
     background: #ffffff;
     border: 1px solid #dbe3ef;
@@ -360,7 +358,6 @@ div[data-baseweb="radio"] * {
     line-height: 1.5;
 }
 
-/* 合計 */
 .total-box {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     color: white;
@@ -507,11 +504,9 @@ def load_data():
     if df.empty:
         df = pd.DataFrame(columns=HEADER_COLUMNS)
 
-    # 旧ヘッダー「要件」でも読み込めるようにする
     if "用件" not in df.columns and "要件" in df.columns:
         df["用件"] = df["要件"]
 
-    # 「要件」と「用件」が両方ある場合は、用件が空なら要件から補完
     if "用件" in df.columns and "要件" in df.columns:
         df["用件"] = df["用件"].replace("", pd.NA).fillna(df["要件"])
 
@@ -536,9 +531,6 @@ def reset_input_fields():
 
 ws = get_worksheet()
 
-# =========================
-# 日付更新チェック
-# =========================
 today = str(today_jst())
 
 if "last_date" not in st.session_state:
@@ -549,9 +541,6 @@ if st.session_state.last_date != today:
     load_data.clear()
     st.rerun()
 
-# =========================
-# 担当者選択
-# =========================
 if "staff" not in st.session_state:
     st.session_state.staff = ""
 
@@ -570,14 +559,8 @@ if st.session_state.staff == "":
 staff = st.session_state.staff
 st.markdown(f'<div class="staff-badge">担当者：{staff}</div>', unsafe_allow_html=True)
 
-# =========================
-# データ取得
-# =========================
 df = load_data()
 
-# =========================
-# リセットフラグ
-# =========================
 if "reset_form" not in st.session_state:
     st.session_state["reset_form"] = False
 
@@ -585,9 +568,6 @@ if st.session_state["reset_form"]:
     reset_input_fields()
     st.session_state["reset_form"] = False
 
-# =========================
-# 入力初期値
-# =========================
 if "input_mode" not in st.session_state:
     st.session_state["input_mode"] = "通常入力"
 if "input_selected_date" not in st.session_state:
@@ -605,9 +585,6 @@ if "input_category" not in st.session_state:
 if "input_note" not in st.session_state:
     st.session_state["input_note"] = ""
 
-# =========================
-# 入力エリア
-# =========================
 st.markdown('<div class="section-card">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">入力</div>', unsafe_allow_html=True)
 st.markdown('<div class="help-text">通常入力は本日分、過去入力は日付を指定して登録できます。</div>', unsafe_allow_html=True)
@@ -675,9 +652,6 @@ if st.session_state.get("added"):
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# =========================
-# 履歴エリア
-# =========================
 st.markdown('<div class="section-card">', unsafe_allow_html=True)
 st.markdown('<div class="section-title">履歴</div>', unsafe_allow_html=True)
 
